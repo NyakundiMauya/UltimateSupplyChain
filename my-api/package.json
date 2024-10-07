@@ -10,7 +10,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
@@ -19,6 +18,8 @@
     "pg": "^8.13.0"
   },
   "devDependencies": {
+    "@types/pg": "^8.11.10",
     "nodemon": "^2.0.15"
-  }
+  },
+  "description": ""
 }
