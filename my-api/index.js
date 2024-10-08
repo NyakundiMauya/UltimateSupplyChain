@@ -1,15 +1,10 @@
-// index.js
-const express = require('express');
-const cors = require('cors');
-const pool = require('./config/db'); // Import the database configuration
+// index.js - server initialization
+const app = require('./server'); // Import the server from server.js
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001; // Ensure the port matches server.js
 
-app.use(cors());
-app.use(express.json());
-
-// Start the server and log the port
+// Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
+
