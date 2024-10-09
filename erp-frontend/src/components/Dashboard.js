@@ -1,14 +1,12 @@
-// Dashboard.js
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = ({ onLogout }) => {
-    const navigate = useNavigate(); // Hook to programmatically navigate
+    const navigate = useNavigate();
 
     const handleLogout = () => {
-        onLogout(); // Call the onLogout function passed as a prop
-        navigate('/auth'); // Navigate back to the auth page
+        onLogout();
+        navigate('/auth');
     };
 
     return (

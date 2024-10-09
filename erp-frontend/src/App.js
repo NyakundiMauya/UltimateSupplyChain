@@ -7,6 +7,9 @@ import Auth from './Auth';  // Import the Auth component
 import Dashboard from './components/Dashboard'; // Update the import path
 import { FaHome, FaUser, FaCog, FaBars, FaMoon, FaSun } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import Header from './components/Header';
+import Footer from './components/Footer';
+
 
 const IconButton = ({ Icon, label }) => (
   <motion.div
@@ -18,38 +21,6 @@ const IconButton = ({ Icon, label }) => (
   </motion.div>
 );
 
-const TopBar = ({ toggleDarkMode, darkMode, toggleSidebar }) => (
-  <div className="w-full flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md">
-    <div className="flex items-center space-x-4">
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={toggleSidebar}
-        className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-300 transition duration-300"
-      >
-        <FaBars className="text-3xl" />
-      </motion.button>
-      <IconButton Icon={FaHome} label="Home" />
-      <IconButton Icon={FaUser} label="Profile" />
-      <IconButton Icon={FaCog} label="Settings" />
-    </div>
-    <h1 className="text-blue-500 dark:text-blue-300 font-medium text-xl flex items-center">
-      Site
-    </h1>
-    <motion.button
-      whileTap={{ scale: 0.9 }}
-      onClick={toggleDarkMode}
-      className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-300 transition duration-300"
-    >
-      {darkMode ? <FaSun className="text-2xl" /> : <FaMoon className="text-2xl" />}
-    </motion.button>
-  </div>
-);
-
-const Footer = () => (
-  <div className="w-full flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md mt-auto">
-    <span className="text-gray-600 dark:text-gray-300 text-sm">&copy; 2023 Site</span>
-  </div>
-);
 
 const Sidebar = ({ isOpen, toggleSidebar }) => (
   <motion.div
@@ -103,7 +74,7 @@ const App = () => {
   return (
     <Router>
       <div className={`flex flex-col h-screen ${darkMode ? 'bg-gray-900' : 'bg-blue-50'} ${darkMode ? 'dark' : ''}`}>
-        <TopBar toggleDarkMode={toggleDarkMode} darkMode={darkMode} toggleSidebar={toggleSidebar} />
+        <Header toggleDarkMode={toggleDarkMode} darkMode={darkMode} toggleSidebar={toggleSidebar} />
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex justify-center items-center flex-grow p-4">
           <motion.div
@@ -129,4 +100,3 @@ const App = () => {
 };
 
 export default App;
-

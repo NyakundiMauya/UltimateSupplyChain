@@ -2,33 +2,28 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
-    const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
+    const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: ''
     });
     const [message, setMessage] = useState('');
-    const navigate = useNavigate(); // Initialize the useNavigate hook
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        setFormData(prevData => ({ ...prevData, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const url = isLogin ? 'http://localhost:5001/api/auth/login' : 'http://localhost:5001/api/auth/signup';
+        const url = `http://localhost:5001/api/auth/${isLogin ? 'login' : 'signup'}`;
 
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
 
@@ -36,9 +31,9 @@ const Auth = () => {
 
             if (response.ok) {
                 if (isLogin) {
-                    localStorage.setItem('token', data.token); // Store the token in localStorage
+                    localStorage.setItem('token', data.token);
                     setMessage('Login successful!');
-                    navigate('/dashboard'); // Redirect to Dashboard
+                    navigate('/dashboard');
                 } else {
                     setMessage('Signup successful! You can now log in.');
                 }
@@ -98,10 +93,9 @@ const Auth = () => {
                     {isLogin ? 'Signup' : 'Login'}
                 </button>
             </p>
-            {message && <p>{message}</p>} {/* Display success/error messages */}
+            {message && <p>{message}</p>}
         </div>
     );
 };
 
 export default Auth;
-
