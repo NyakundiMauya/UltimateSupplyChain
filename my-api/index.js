@@ -1,15 +1,16 @@
-// index.js
-const express = require('express');
-const cors = require('cors');
-const pool = require('./config/db'); // Import the database configuration
+import express from 'express' 
+import cors from 'cors'
+import {adminRouter} from "./Routes/salesrepAdminRoute.js"
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const app = express()
+app.use(cors({
+    origin: ["http://localhost:5173"],
+    methods: ['GET', 'POST', 'PUT'],
+    credentials: true
+}))
+app.use(express.json())
+app.use('/auth',adminRouter)
 
-app.use(cors());
-app.use(express.json());
-
-// Start the server and log the port
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(3000, () => {
+    console.log("Server is running")
+})
