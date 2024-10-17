@@ -1,23 +1,34 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Ignore node_modules in client and server folders
+client/node_modules/
+server/node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# pnpm specific files
+client/.pnp
+client/.pnp.js
+server/.pnp
+server/.pnp.js
 
-# testing
-/coverage
+# Testing coverage reports
+client/coverage/
+server/coverage/
 
-# production
-/build
+# Production build directories
+client/build/
+server/build/
 
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Miscellaneous
+client/.DS_Store
+client/.env.local
+client/.env.development.local
+client/.env.test.local
+client/.env.production.local
+server/.DS_Store
+server/.env.local
+server/.env.development.local
+server/.env.test.local
+server/.env.production.local
 
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
