@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.pos-item {
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.pos-item:hover {
+  background-color: #f5f5f5;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+.pos-item img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.mui-button {
+  text-transform: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.mui-card {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mui-typography {
+  font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+.mui-app-bar {
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.87);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
