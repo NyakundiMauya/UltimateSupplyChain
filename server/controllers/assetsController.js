@@ -1,13 +1,19 @@
-import Asset from '../models/assets.js';
+import Asset from '../models/Assets.js';
 
 export const createAsset = async (req, res) => {
   const { type, title, serialNumber, dateLoaned, dateReturned, departmentLoanedTo } = req.body;
+
+  // Basic input validation
+  if (!type || !title || !serialNumber) {
+    return res.status(400).json({ message: 'Type, title, and serialNumber are required fields' });
+  }
 
   try {
     const newAsset = new Asset({ type, title, serialNumber, dateLoaned, dateReturned, departmentLoanedTo });
     await newAsset.save();
     res.status(201).json(newAsset);
   } catch (error) {
+    console.error('Error creating asset:', error);
     res.status(400).json({ message: error.message });
   }
 };

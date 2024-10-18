@@ -122,40 +122,42 @@ const Dashboard = () => {
     return { current: currentMonthCustomers, last: lastMonthCustomers, percentage };
   }, [customersData]);
 
-  // Calculate product transaction counts
+  // Update the productTransactionCounts calculation
   const productTransactionCounts = useMemo(() => {
     if (!transactionsData || !productsData) return [];
-    
-    //console.log("Transactions data:", transactionsData);
-    //console.log("Products data:", productsData);
+
+    console.log('First transaction:', transactionsData[0]);
+    console.log('First product:', productsData[0]);
 
     const counts = {};
     transactionsData.forEach(transaction => {
-      console.log("Processing transaction:", transaction);
-      if (Array.isArray(transaction.products)) {
-        transaction.products.forEach(productId => {
-          console.log("Processing product ID:", productId);
-          counts[productId] = (counts[productId] || 0) + 1;
+      if (transaction.products && Array.isArray(transaction.products)) {
+        transaction.products.forEach(productEntry => {
+          if (productEntry.product) {
+            const productId = productEntry.product.toString();
+            counts[productId] = (counts[productId] || 0) + 1;
+          }
         });
-      } else {
-        console.warn("Transaction products is not an array:", transaction.products);
       }
     });
 
-    console.log("Product counts:", counts);
+    console.log('Transaction counts:', counts);
 
-    const result = productsData.map(product => {
-      const count = counts[product._id] || 0;
-      console.log(`Product ${product.name} (${product._id}) count:`, count);
-      return {
-        id: product._id,
-        name: product.name,
-        transactionCount: count
-      };
-    }).sort((a, b) => b.transactionCount - a.transactionCount);
+    const productsWithTransactions = productsData
+      .map(product => {
+        const productId = product._id.toString();
+        return {
+          id: productId,
+          name: product.name,
+          transactionCount: counts[productId] || 0
+        };
+      })
+      .filter(product => product.transactionCount > 0)
+      .sort((a, b) => b.transactionCount - a.transactionCount);
 
-    console.log("Final result:", result);
-    return result;
+    console.log('Products with transactions:', productsWithTransactions);
+
+    return productsWithTransactions;
   }, [transactionsData, productsData]);
 
   // Get top 5 trending products
@@ -167,8 +169,8 @@ const Dashboard = () => {
   const totalRevenue = useMemo(() => {
     if (!transactionsData) return 0;
     return transactionsData.reduce((sum, transaction) => {
-      const cost = parseFloat(transaction.cost);
-      return sum + (isNaN(cost) ? 0 : cost);
+      const amount = parseFloat(transaction.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
   }, [transactionsData]);
 
@@ -544,30 +546,43 @@ const Dashboard = () => {
         <Grid item xs={12}>
           <Card elevation={3}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Products by Transaction Count</Typography>
+              <Typography variant="h6" gutterBottom>Products with Transactions</Typography>
               {loadingTransactions || loadingProducts ? (
                 <CircularProgress />
               ) : transactionError || productError ? (
                 <Alert severity="error">Failed to load product transaction data!</Alert>
               ) : productTransactionCounts.length === 0 ? (
-                <Typography>No product transaction data available.</Typography>
+                <Box>
+                  <Typography>No products with transactions found.</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Total transactions: {transactionsData ? transactionsData.length : 0}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Total products: {productsData ? productsData.length : 0}
+                  </Typography>
+                </Box>
               ) : (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Product Name</TableCell>
-                      <TableCell align="right">Transaction Count</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {productTransactionCounts.slice(0, 10).map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>{product.name}</TableCell>
-                        <TableCell align="right">{product.transactionCount}</TableCell>
+                <>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Products with transactions: {productTransactionCounts.length}
+                  </Typography>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Product Name</TableCell>
+                        <TableCell align="right">Transaction Count</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHead>
+                    <TableBody>
+                      {productTransactionCounts.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell>{product.name}</TableCell>
+                          <TableCell align="right">{product.transactionCount}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </>
               )}
             </CardContent>
           </Card>

@@ -1,5 +1,3 @@
-// my-api/backend/models/Employee.js
-
 import mongoose from "mongoose";
 
 // Delete the existing model if it exists (for hot-reloading in development)
@@ -30,6 +28,8 @@ const employeeSchema = new mongoose.Schema({
     role: {
         type: String,
         default: 'employee',
+        enum: ['admin', 'employee']
+
     },
     category: {
         type: String,
@@ -46,7 +46,22 @@ const employeeSchema = new mongoose.Schema({
         type: Number,
         required: false,
     },
-});
+    branch: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function (v) {
+                return /^[A-Z]{3}\d{3}$/.test(v);
+            },
+            message: props => `${props.value} is not a valid branch code!`,
+        },
+    },
+    position: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+}, { strict: false }); // Add this option
 
 // Create a model based on the schema
 const Employee = mongoose.model("Employee", employeeSchema);

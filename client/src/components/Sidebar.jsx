@@ -27,6 +27,7 @@ import {
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
+  StorefrontOutlined,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
@@ -41,12 +42,12 @@ const navItems = [
   { text: "Sales", icon: null },
   { text: "Overview", icon: <TrendingUpOutlined /> },
   { text: "Daily", icon: <TodayOutlined /> },
-  { text: "Monthly", icon: <CalendarMonthOutlined /> },
   { text: "Breakdown", icon: <PieChartOutlined /> },
   { text: "Finance", icon: null },
   { text: "Expenses", icon: <PointOfSaleOutlined /> },  
   { text: "Invoices", icon: <ReceiptLongOutlined /> },
   { text: "Management", icon: null },
+  { text: "Stores", icon: <StorefrontOutlined /> },
   { text: "Employees", icon: <Groups2Outlined /> },
   { text: "Inventory", icon: <ShoppingCartOutlined /> }, // New item
   { text: "Assets", icon: <PublicOutlined /> }, // New item 

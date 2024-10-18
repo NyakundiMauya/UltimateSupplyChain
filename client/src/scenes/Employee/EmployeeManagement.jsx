@@ -71,6 +71,7 @@ const EmployeeManagement = () => {
     { field: "phoneNumber", headerName: "Phone Number", flex: 1 },
     { field: "role", headerName: "Role", flex: 1 },
     { field: "category", headerName: "Category", flex: 1 },
+    { field: "position", headerName: "Position", flex: 1 },
     { 
       field: "salary", 
       headerName: "Salary (KSh)", 
@@ -83,6 +84,7 @@ const EmployeeManagement = () => {
         return `KSh ${params.value.toLocaleString()}`;
       },
     },
+    { field: "branch", headerName: "Branch", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -112,7 +114,8 @@ const EmployeeManagement = () => {
     try {
       const employeeData = {
         ...currentEmployee,
-        
+        role: currentEmployee.role || 'employee',
+        position: currentEmployee.position || '', // Add position field
       };
 
       if (dialogMode === "add") {
@@ -197,6 +200,7 @@ const EmployeeManagement = () => {
                 label="Name"
                 type="text"
                 fullWidth
+                required
                 value={currentEmployee.name || ""}
                 onChange={(e) => setCurrentEmployee({ ...currentEmployee, name: e.target.value })}
               />
@@ -206,6 +210,7 @@ const EmployeeManagement = () => {
                 label="Email"
                 type="email"
                 fullWidth
+                required
                 value={currentEmployee.email || ""}
                 onChange={(e) => setCurrentEmployee({ ...currentEmployee, email: e.target.value })}
               />
@@ -215,18 +220,50 @@ const EmployeeManagement = () => {
                 label="Phone Number"
                 type="text"
                 fullWidth
+                required
                 value={currentEmployee.phoneNumber || ""}
                 onChange={(e) => setCurrentEmployee({ ...currentEmployee, phoneNumber: e.target.value })}
               />
-              <TextField
-                margin="dense"
-                name="category"
-                label="Category"
-                type="text"
-                fullWidth
-                value={currentEmployee.category || ""}
-                onChange={(e) => setCurrentEmployee({ ...currentEmployee, category: e.target.value })}
-              />
+              {dialogMode === "add" && (
+                <TextField
+                  margin="dense"
+                  name="password"
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  required
+                  value={currentEmployee.password || ""}
+                  onChange={(e) => setCurrentEmployee({ ...currentEmployee, password: e.target.value })}
+                />
+              )}
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="role-label">Role</InputLabel>
+                <Select
+                  labelId="role-label"
+                  name="role"
+                  value={currentEmployee.role || "employee"}
+                  onChange={(e) => setCurrentEmployee({ ...currentEmployee, role: e.target.value })}
+                >
+                  <MenuItem value="employee">Employee</MenuItem>
+                  <MenuItem value="manager">Manager</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth margin="dense" required>
+                <InputLabel id="category-label">Category</InputLabel>
+                <Select
+                  labelId="category-label"
+                  name="category"
+                  value={currentEmployee.category || ""}
+                  onChange={(e) => setCurrentEmployee({ ...currentEmployee, category: e.target.value })}
+                >
+                  <MenuItem value="Human Resources (HR)">Human Resources (HR)</MenuItem>
+                  <MenuItem value="Finance and Accounting">Finance and Accounting</MenuItem>
+                  <MenuItem value="Sales and Marketing">Sales and Marketing</MenuItem>
+                  <MenuItem value="Operations">Operations</MenuItem>
+                  <MenuItem value="Information Technology (IT)">Information Technology (IT)</MenuItem>
+                </Select>
+              </FormControl>
               <TextField
                 margin="dense"
                 name="salary"
@@ -238,6 +275,26 @@ const EmployeeManagement = () => {
                 InputProps={{
                   startAdornment: <InputAdornment position="start">KSh</InputAdornment>,
                 }}
+              />
+              <TextField
+                margin="dense"
+                name="branch"
+                label="Branch Code"
+                type="text"
+                fullWidth
+                required
+                value={currentEmployee.branch || ""}
+                onChange={(e) => setCurrentEmployee({ ...currentEmployee, branch: e.target.value })}
+                helperText="Branch code format: ABC123"
+              />
+              <TextField
+                margin="dense"
+                name="position"
+                label="Position"
+                type="text"
+                fullWidth
+                value={currentEmployee.position || ""}
+                onChange={(e) => setCurrentEmployee({ ...currentEmployee, position: e.target.value })}
               />
             </DialogContent>
             <DialogActions>

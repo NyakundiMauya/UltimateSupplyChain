@@ -23,8 +23,8 @@ const Transactions = () => {
 
   const columns = [
     {
-      field: "_id",
-      headerName: "ID",
+      field: "orderId",
+      headerName: "Order ID",
       flex: 1,
     },
     {
@@ -33,8 +33,19 @@ const Transactions = () => {
       flex: 1,
     },
     {
-      field: "createdAt",
-      headerName: "CreatedAt",
+      field: "amount",
+      headerName: "Amount",
+      flex: 1,
+      renderCell: (params) => `KSH ${Number(params.value).toFixed(2)}`,
+    },
+    {
+      field: "paymentMethod",
+      headerName: "Payment Method",
+      flex: 1,
+    },
+    {
+      field: "status",
+      headerName: "Status",
       flex: 1,
     },
     {
@@ -45,10 +56,28 @@ const Transactions = () => {
       renderCell: (params) => params.value.length,
     },
     {
-      field: "cost",
-      headerName: "Cost",
+      field: "paymentDetails",
+      headerName: "Payment Details",
       flex: 1,
-      renderCell: (params) => `KSH ${Number(params.value).toFixed(2)}`,
+      renderCell: (params) => {
+        if (params.row.paymentMethod === 'card') {
+          return `${params.value.cardBrand} **** ${params.value.lastFourDigits}`;
+        } else if (params.row.paymentMethod === 'mpesa') {
+          return `M-Pesa: ${params.row.mpesaDetails.phoneNumber}`;
+        }
+        return 'N/A';
+      },
+    },
+    {
+      field: "branchCode",
+      headerName: "Branch Code",
+      flex: 1,
+    },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      flex: 1,
+      renderCell: (params) => new Date(params.value).toLocaleString(),
     },
   ];
 
@@ -89,7 +118,7 @@ const Transactions = () => {
       />
       <Box
         height="80vh"
-        
+        mt="20px" // Add top margin for spacing
       >
         <DataGrid
           loading={isLoading || !transactionsData}
