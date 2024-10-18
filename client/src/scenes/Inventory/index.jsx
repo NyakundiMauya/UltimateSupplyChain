@@ -3,89 +3,8 @@ import { Box, Typography, CircularProgress, Accordion, AccordionSummary, Accordi
 import { DataGrid } from '@mui/x-data-grid';
 import { useGetProductsQuery, useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation } from 'state/api';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    background: {
-      default: '#202124',
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: '#e8eaed',
-    },
-    primary: {
-      main: '#8ab4f8',
-    },
-    action: {
-      hover: 'rgba(138, 180, 248, 0.12)',
-    },
-  },
-  typography: {
-    fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-    h4: {
-      fontSize: '0.75rem',
-      fontWeight: 500,
-    },
-    body1: {
-      fontSize: '0.875rem',
-      fontWeight: 400,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '0 24px 24px 0',
-          marginRight: '16px',
-          marginLeft: '8px',
-        },
-      },
-    },
-    MuiListItem: {
-      styleOverrides: {
-        root: {
-          borderRadius: '0 24px 24px 0',
-          marginRight: '16px',
-          marginLeft: '8px',
-          '&:hover': {
-            backgroundColor: 'rgba(138, 180, 248, 0.12)',
-          },
-        },
-      },
-    },
-    MuiListItemIcon: {
-      styleOverrides: {
-        root: {
-          minWidth: '40px',
-          color: '#9aa0a6', // 
-          '&.Mui-selected': {
-            color: '#8ab4f8', // 
-          },
-        },
-      },
-    },
-    MuiAccordion: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'transparent',
-          boxShadow: 'none',
-          '&:before': {
-            display: 'none',
-          },
-        },
-      },
-    },
-    MuiAccordionSummary: {
-      styleOverrides: {
-        root: {
-          padding: '0 16px',
-        },
-      },
-    },
-  },
-});
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import './index.css';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -242,58 +161,47 @@ const Inventory = () => {
   const groupedProducts = groupProductsByCategory(products);
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', color: 'text.primary' }}>
-        <Typography variant="h4" sx={{ m: "1.5rem 0 0.5rem 1.5rem" }}>Inventory</Typography>
-        <Button
-          onClick={handleAddProduct}
-          variant="contained"
-          color="primary"
-          sx={{ mb: 2, ml: 2 }}
-        >
-          Add Product
-        </Button>
-        {products && products.length > 0 ? (
-          Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-            <Accordion key={category}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
-                <Typography variant="h6" sx={{ fontWeight: 500 }}>{category} ({categoryProducts.length})</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box height="400px">
-                  <DataGrid
-                    getRowId={(row) => row._id}
-                    rows={categoryProducts}
-                    columns={columns}
-                    sx={{
-                      '& .MuiDataGrid-cell': {
-                        color: 'text.secondary',
-                      },
-                      '& .MuiDataGrid-columnHeaders': {
-                        backgroundColor: 'background.default',
-                        color: 'text.primary',
-                      },
-                    }}
-                  />
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          ))
-        ) : (
-          <Typography sx={{ ml: 2 }}>No products found</Typography>
-        )}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>{editProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
-          <DialogContent>
-            <ProductForm 
-              product={editProduct} 
-              onSubmit={handleSubmit} 
-              onCancel={() => setOpenDialog(false)} 
-            />
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </ThemeProvider>
+    <Box sx={{ minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ m: "1.5rem 0 0.5rem 1.5rem" }}>Inventory</Typography>
+      <Button
+        onClick={handleAddProduct}
+        variant="contained"
+        color="primary"
+        sx={{ mb: 2, ml: 2 }}
+      >
+        Add Product
+      </Button>
+      {products && products.length > 0 ? (
+        Object.entries(groupedProducts).map(([category, categoryProducts]) => (
+          <Accordion key={category}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>{category} ({categoryProducts.length})</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box height="400px">
+                <DataGrid
+                  getRowId={(row) => row._id}
+                  rows={categoryProducts}
+                  columns={columns}
+                />
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        ))
+      ) : (
+        <Typography sx={{ ml: 2 }}>No products found</Typography>
+      )}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>{editProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
+        <DialogContent>
+          <ProductForm 
+            product={editProduct} 
+            onSubmit={handleSubmit} 
+            onCancel={() => setOpenDialog(false)} 
+          />
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 };
 

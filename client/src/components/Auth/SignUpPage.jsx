@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { AuthContainer, AuthForm, AuthInput, AuthButton, AuthError } from './authStyles';
+import { AuthContainer, AuthForm, AuthInput, AuthButton, AuthError, ButtonContainer } from './authStyles';
 import { MenuItem } from '@mui/material';
 
 const SignUpPage = () => {
@@ -45,6 +45,10 @@ const SignUpPage = () => {
                 setError('An unexpected error occurred. Please try again.');
             }
         }
+    };
+
+    const navigateToLogin = () => {
+        navigate('/login');
     };
 
     return (
@@ -102,7 +106,10 @@ const SignUpPage = () => {
                     <MenuItem value="Operations">Operations</MenuItem>
                     <MenuItem value="Information Technology (IT)">Information Technology (IT)</MenuItem>
                 </AuthInput>
-                <AuthButton type="submit" variant="contained">Signup</AuthButton>
+                <ButtonContainer>
+                    <AuthButton type="submit" variant="contained">Signup</AuthButton>
+                    <AuthButton type="button" variant="outlined" onClick={navigateToLogin}>Login</AuthButton>
+                </ButtonContainer>
             </AuthForm>
         </AuthContainer>
     );

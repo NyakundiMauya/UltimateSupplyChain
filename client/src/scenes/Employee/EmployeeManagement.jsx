@@ -21,60 +21,17 @@ import {
   InputLabel,
   Alert,
   Snackbar,
+  InputAdornment,
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import './index.css';
+
+
 
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    background: {
-      default: '#202124',
-      paper: '#202124',
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: '#e8eaed',
-    },
-    primary: {
-      main: '#8ab4f8',
-    },
-    action: {
-      hover: 'rgba(138, 180, 248, 0.12)',
-    },
-  },
-  typography: {
-    fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-    fontSize: 14,
-    h4: {
-      fontSize: '0.75rem',
-      fontWeight: 500,
-    },
-    body1: {
-      fontSize: '0.875rem',
-      fontWeight: 400,
-    },
-  },
-  components: {
-    MuiListItem: {
-      styleOverrides: {
-        root: {
-          borderRadius: '0 24px 24px 0',
-          marginRight: '16px',
-          marginLeft: '8px',
-          '&:hover': {
-            backgroundColor: 'rgba(138, 180, 248, 0.12)',
-          },
-        },
-      },
-    },
-    MuiListItemIcon: {
-      styleOverrides: {
-        root: {
-          minWidth: '40px',
-        },
-      },
-    },
   },
 });
 
@@ -114,7 +71,18 @@ const EmployeeManagement = () => {
     { field: "phoneNumber", headerName: "Phone Number", flex: 1 },
     { field: "role", headerName: "Role", flex: 1 },
     { field: "category", headerName: "Category", flex: 1 },
-    { field: "salary", headerName: "Salary", flex: 1, type: 'number' },
+    { 
+      field: "salary", 
+      headerName: "Salary (KSh)", 
+      flex: 1, 
+      type: 'number',
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return '';
+        }
+        return `KSh ${params.value.toLocaleString()}`;
+      },
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -188,46 +156,20 @@ const EmployeeManagement = () => {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Box m="1.5rem 2.5rem" sx={{ color: 'text.primary' }}>
-        <Typography variant="h1" gutterBottom sx={{ mb: 2, fontSize: '2rem', fontWeight: 'bold' }}>
+      <Box className="employee-management">
+        <Typography variant="h1" gutterBottom>
           Employee Management
         </Typography>
         <Button
           onClick={() => handleOpenDialog("add")}
           variant="contained"
           color="primary"
-          sx={{ mb: 2 }}
+          className="add-button"
         >
           Add New Employee
         </Button>
         {employees && employees.length > 0 ? (
-          <Box
-            mt="40px"
-            height="75vh"
-            sx={{
-              '& .MuiDataGrid-root': {
-                border: 'none',
-                backgroundColor: 'background.default',
-              },
-              '& .MuiDataGrid-cell': {
-                borderBottom: 'none',
-              },
-              '& .MuiDataGrid-columnHeaders': {
-                backgroundColor: 'background.paper',
-                borderBottom: 'none',
-              },
-              '& .MuiDataGrid-virtualScroller': {
-                backgroundColor: 'background.default',
-              },
-              '& .MuiDataGrid-footerContainer': {
-                backgroundColor: 'background.paper',
-                borderTop: 'none',
-              },
-              '& .MuiDataGrid-toolbarContainer .MuiButton-text': {
-                color: 'text.primary',
-              },
-            }}
-          >
+          <Box className="employee-grid">
             <DataGrid
               loading={isLoading}
               getRowId={(row) => row._id}
@@ -288,11 +230,14 @@ const EmployeeManagement = () => {
               <TextField
                 margin="dense"
                 name="salary"
-                label="Salary"
+                label="Salary (KSh)"
                 type="number"
                 fullWidth
                 value={currentEmployee.salary || ""}
                 onChange={(e) => setCurrentEmployee({ ...currentEmployee, salary: Number(e.target.value) })}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">KSh</InputAdornment>,
+                }}
               />
             </DialogContent>
             <DialogActions>

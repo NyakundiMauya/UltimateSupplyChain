@@ -4,14 +4,19 @@ import mongoose from "mongoose";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import clientRoutes from "./routes/client.js";
-import generalRoutes from "./routes/general.js";
-import salesRoutes from "./routes/sales.js";
 import employeeRoutes from './routes/employeeRoutes.js'; // Import the employee routes
+import productRoutes from './routes/productRoutes.js'; // Import the product routes
+import customerRoutes from './routes/customerRoutes.js'; // Import the customer routes
+import transactionRoutes from './routes/transactionRoute.js'; // Import the transaction routes
+import assetsRoutes from './routes/assetsRoutes.js'; // Import the assets routes
+import expenseRoutes from './routes/expenseRoutes.js'; // Import the expense routes
 import dotenv from 'dotenv';
-import checkRole from './middleware/checkRole.js';
+// import checkRole from './middleware/checkRole.js';
 
 dotenv.config();
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+console.log('MONGO_URL:', process.env.MONGO_URL);
+console.log('Server Port:', process.env.PORT || 9000);
 
 /* CONFIGURATION */
 const app = express();
@@ -30,13 +35,13 @@ app.use((req, res, next) => {
 });
 
 /* ROUTES */
-console.log("About to register routes with role checks");
-app.use("/client", checkRole(['admin', 'employee']), clientRoutes);
-app.use("/general", checkRole(['admin', 'employee']), generalRoutes);
-app.use("/sales", checkRole(['admin', 'employee']), salesRoutes);
-app.use('/api/employees', checkRole('admin'), employeeRoutes);
-console.log("Routes registered with role checks");
-
+// Remove console.log statements for production
+app.use('/api/employees', employeeRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/assets', assetsRoutes); // Add this line
+app.use('/api/expenses', expenseRoutes); // Add this line
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;
 
@@ -53,8 +58,8 @@ mongoose
   })
   .catch((error) => console.log(`${error} did not connect`));
 
-// Add this catch-all route at the end
+// Move the catch-all route to the end, after all other routes
 app.use('*', (req, res) => {
   console.log(`Route not found: ${req.method} ${req.originalUrl}`);
-  res.status(404).send('Route not found');
+  res.status(404).json({ error: 'Route not found' }); // Send JSON response
 });

@@ -39,13 +39,17 @@ const navItems = [
   { text: "Customers", icon: <Groups2Outlined /> },
   { text: "Transactions", icon: <ReceiptLongOutlined /> },
   { text: "Sales", icon: null },
-  { text: "Overview", icon: <PointOfSaleOutlined /> },
+  { text: "Overview", icon: <TrendingUpOutlined /> },
   { text: "Daily", icon: <TodayOutlined /> },
   { text: "Monthly", icon: <CalendarMonthOutlined /> },
   { text: "Breakdown", icon: <PieChartOutlined /> },
+  { text: "Finance", icon: null },
+  { text: "Expenses", icon: <PointOfSaleOutlined /> },  
+  { text: "Invoices", icon: <ReceiptLongOutlined /> },
   { text: "Management", icon: null },
   { text: "Employees", icon: <Groups2Outlined /> },
   { text: "Inventory", icon: <ShoppingCartOutlined /> }, // New item
+  { text: "Assets", icon: <PublicOutlined /> }, // New item 
   { text: "Settings", icon: <SettingsOutlined /> },
 ];
 
@@ -54,7 +58,7 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   marginRight: '16px',
   marginLeft: '8px',
   '&:hover': {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: 'transparent', // Remove hover background color
   },
 }));
 

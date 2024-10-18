@@ -1,0 +1,45 @@
+.dashboard-container {
+  margin: 1.5rem 2.5rem;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-container {
+  margin-top: 3px;
+}
+
+.card {
+  height: 100%;
+}
+
+.card-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.table-container {
+  flex-grow: 1;
+}
+
+.total-row {
+  font-weight: bold;
+}

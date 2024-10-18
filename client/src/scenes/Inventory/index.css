@@ -1,0 +1,62 @@
+body {
+  background-color: #202124;
+  color: #ffffff;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.MuiTypography-h4 {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.MuiTypography-body1 {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.MuiButton-root {
+  border-radius: 0 24px 24px 0;
+  margin-right: 16px;
+  margin-left: 8px;
+}
+
+.MuiListItem-root {
+  border-radius: 0 24px 24px 0;
+  margin-right: 16px;
+  margin-left: 8px;
+}
+
+.MuiListItem-root:hover {
+  background-color: rgba(138, 180, 248, 0.12);
+}
+
+.MuiListItemIcon-root {
+  min-width: 40px;
+  color: #9aa0a6;
+}
+
+.MuiListItemIcon-root.Mui-selected {
+  color: #8ab4f8;
+}
+
+.MuiAccordion-root {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.MuiAccordion-root:before {
+  display: none;
+}
+
+.MuiAccordionSummary-root {
+  padding: 0 16px;
+}
+
+.MuiDataGrid-cell {
+  color: #e8eaed;
+}
+
+.MuiDataGrid-columnHeaders {
+  background-color: #202124;
+  color: #ffffff;
+}

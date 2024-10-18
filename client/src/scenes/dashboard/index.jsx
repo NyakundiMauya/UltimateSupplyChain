@@ -1,47 +1,63 @@
 import React, { useMemo } from "react";
-import FlexBetween from "components/FlexBetween";
-import {
-  DownloadOutlined,
-  PointOfSale,
-  ShoppingCart,
-  TrendingUp,
-  People,
-} from "@mui/icons-material";
 import {
   Box,
-  Button,
   Typography,
   useTheme,
-  useMediaQuery,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Card,
-  CardContent,
-  Grid,
   CircularProgress,
+  Alert,
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Paper,
+  Divider,
+  Button
 } from "@mui/material";
-import {
-  useGetDashboardQuery,
-  useGetEmployeesQuery,
-  useGetProductsQuery
+import { 
+  useGetEmployeesQuery, 
+  useGetProductsQuery, 
+  useGetCustomersQuery,
+  useGetTransactionsQuery,
+  useGetExpensesQuery // Add this new import
 } from "state/api";
-import StatBox from "components/StatBox";
 import Header from "components/Header";
-
-
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import PeopleIcon from '@mui/icons-material/People';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DownloadIcon from '@mui/icons-material/Download';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff'; // Import a new icon for expenses
+import './index.css'; // Import the CSS file
 
 const Dashboard = () => {
   const theme = useTheme();
-  const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
-  const { data, isLoading } = useGetDashboardQuery(null, {
-    pollingInterval: 30000, // Poll every 30 seconds
-  });
-  const { data: employeesData } = useGetEmployeesQuery();
-  const { data: productsData } = useGetProductsQuery();
 
+  // Fetch data from APIs
+  const { data: employeesData, isLoading: loadingEmployees, error: employeeError } = useGetEmployeesQuery();
+  const { data: productsData, isLoading: loadingProducts, error: productError } = useGetProductsQuery();
+  const { data: customersData, isLoading: loadingCustomers, error: customerError } = useGetCustomersQuery();
+
+  // Add this new query
+  const { data: transactionsData, isLoading: loadingTransactions, error: transactionError } = useGetTransactionsQuery({
+    page: 0,
+    pageSize: 1000, // Adjust this value based on your needs
+    sort: JSON.stringify({}),
+    search: "",
+  });
+
+  // Add this new query
+  const { data: expensesData, isLoading: loadingExpenses, error: expenseError } = useGetExpensesQuery();
+
+  // Calculate employees by category
   const employeesByCategory = useMemo(() => {
     if (!employeesData) return [];
     const categories = {};
@@ -59,204 +75,500 @@ const Dashboard = () => {
     }));
   }, [employeesData]);
 
-  // Calculate percentage changes
-  const calculatePercentageChange = (current, previous) => {
-    if (!previous) return "N/A";
-    const change = ((current - previous) / previous) * 100;
-    return change > 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+  // Calculate total salary of all employees
+  const totalSalary = useMemo(() => {
+    if (!employeesData) return 0;
+    return employeesData.reduce((sum, emp) => sum + (emp.salary || 0), 0);
+  }, [employeesData]);
+
+  // Calculate products by category and total supply
+  const productsByCategory = useMemo(() => {
+    if (!productsData) return [];
+    const categories = {};
+    productsData.forEach((product) => {
+      if (!categories[product.category]) {
+        categories[product.category] = { totalSupply: 0 };
+      }
+      categories[product.category].totalSupply += product.supply || 0;
+    });
+    return Object.entries(categories).map(([category, data]) => ({
+      category,
+      totalSupply: data.totalSupply,
+    }));
+  }, [productsData]);
+
+  // Calculate new customer growth percentage for this month
+  const newCustomerGrowth = useMemo(() => {
+    if (!customersData) return { current: 0, last: 0, percentage: 0 };
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    const countNewCustomers = (startDate, endDate) =>
+      customersData.filter((customer) => {
+        const createdAt = new Date(customer.createdAt);
+        return createdAt >= startDate && createdAt < endDate;
+      }).length;
+
+    const currentMonthCustomers = countNewCustomers(startOfMonth, now);
+    const lastMonthCustomers = countNewCustomers(startOfLastMonth, endOfLastMonth);
+
+    const percentage = lastMonthCustomers
+      ? ((currentMonthCustomers - lastMonthCustomers) / lastMonthCustomers) * 100
+      : 100;
+
+    return { current: currentMonthCustomers, last: lastMonthCustomers, percentage };
+  }, [customersData]);
+
+  // Calculate product transaction counts
+  const productTransactionCounts = useMemo(() => {
+    if (!transactionsData || !productsData) return [];
+    
+    //console.log("Transactions data:", transactionsData);
+    //console.log("Products data:", productsData);
+
+    const counts = {};
+    transactionsData.forEach(transaction => {
+      console.log("Processing transaction:", transaction);
+      if (Array.isArray(transaction.products)) {
+        transaction.products.forEach(productId => {
+          console.log("Processing product ID:", productId);
+          counts[productId] = (counts[productId] || 0) + 1;
+        });
+      } else {
+        console.warn("Transaction products is not an array:", transaction.products);
+      }
+    });
+
+    console.log("Product counts:", counts);
+
+    const result = productsData.map(product => {
+      const count = counts[product._id] || 0;
+      console.log(`Product ${product.name} (${product._id}) count:`, count);
+      return {
+        id: product._id,
+        name: product.name,
+        transactionCount: count
+      };
+    }).sort((a, b) => b.transactionCount - a.transactionCount);
+
+    console.log("Final result:", result);
+    return result;
+  }, [transactionsData, productsData]);
+
+  // Get top 5 trending products
+  const trendingProducts = useMemo(() => {
+    return productTransactionCounts.slice(0, 5);
+  }, [productTransactionCounts]);
+
+  // Calculate total revenue
+  const totalRevenue = useMemo(() => {
+    if (!transactionsData) return 0;
+    return transactionsData.reduce((sum, transaction) => {
+      const cost = parseFloat(transaction.cost);
+      return sum + (isNaN(cost) ? 0 : cost);
+    }, 0);
+  }, [transactionsData]);
+
+  // Calculate total expenses
+  const totalExpenses = useMemo(() => {
+    if (!expensesData || !employeesData) return 0;
+    const expensesSum = expensesData.reduce((sum, expense) => {
+      const amount = parseFloat(expense.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    const salarySum = employeesData.reduce((sum, employee) => {
+      return sum + (employee.salary || 0);
+    }, 0);
+    return expensesSum + salarySum;
+  }, [expensesData, employeesData]);
+
+  // Update the currency formatter
+  const formatCurrency = (amount) => {
+    const formatter = new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    
+    let formatted;
+    if (amount >= 1000000) {
+      formatted = new Intl.NumberFormat('en-KE', {
+        notation: 'compact',
+        compactDisplay: 'short',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount / 1000000) + 'M';
+    } else {
+      formatted = formatter.format(amount).replace(/^KSh\s?/, '');
+    }
+    
+    return formatted;
   };
 
-  const handleDownloadReports = () => {
-    const dashboardData = data || {};
-    const products = productsData || [];
-
-    const escapeCSV = (text) => {
-      if (typeof text !== 'string') return text;
-      return `"${text.replace(/"/g, '""')}"`;
-    };
-
+  // Function to generate CSV content
+  const generateCSV = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
 
-    csvContent += "Dashboard Report\n";
-    Object.entries(dashboardData).forEach(([key, value]) => {
-      csvContent += `${escapeCSV(key)},${escapeCSV(value)}\n`;
-    });
+    // Add summary data
+    csvContent += "Summary\n";
+    csvContent += `Total Employees,${employeesData?.length || 0}\n`;
+    csvContent += `Total Products,${productsData?.length || 0}\n`;
+    csvContent += `New Customers Growth,${newCustomerGrowth.percentage.toFixed(1)}%\n`;
+    csvContent += `Total Revenue,${formatCurrency(totalRevenue)}\n\n`;
 
+    // Add employees by category
+    csvContent += "Employees by Category\n";
+    csvContent += "Category,Count,Total Salary\n";
+    employeesByCategory.forEach(row => {
+      csvContent += `${row.category},${row.count},${formatCurrency(row.totalSalary)}\n`;
+    });
+    csvContent += `Total,,${formatCurrency(totalSalary)}\n\n`;
+
+    // Add products by category
+    csvContent += "Product Categories and Supply\n";
+    csvContent += "Category,Total Supply\n";
+    productsByCategory.forEach(row => {
+      csvContent += `${row.category},${row.totalSupply}\n`;
+    });
     csvContent += "\n";
 
-    csvContent += "Employees by Category Report\n";
-    csvContent += "Category,Employees Count,Total Salary\n";
-    employeesByCategory.forEach((category) => {
-      csvContent += `${escapeCSV(category.category)},${category.count},${category.totalSalary.toFixed(2)}\n`;
+    // Add trending products
+    csvContent += "Trending Products\n";
+    csvContent += "Rank,Product Name,Transaction Count\n";
+    trendingProducts.forEach((product, index) => {
+      csvContent += `${index + 1},${product.name},${product.transactionCount}\n`;
     });
 
-    csvContent += "\n";
+    return encodeURI(csvContent);
+  };
 
-    // Add products data
-    csvContent += "Products Report\n";
-    csvContent += "ID,Name,Price,Category,Rating,Supply\n";
-    products.forEach((product) => {
-      csvContent += `${escapeCSV(product._id)},${escapeCSV(product.name)},$${product.price.toFixed(2)},${escapeCSV(product.category)},${product.rating},${product.supply}\n`;
-    });
-
-    // Create and trigger download
-    const encodedUri = encodeURI(csvContent);
+  // Function to trigger CSV download
+  const downloadCSV = () => {
+    const csv = generateCSV();
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "reports.csv");
+    link.setAttribute("href", csv);
+    link.setAttribute("download", "dashboard_summary.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const revenueChange = data ? calculatePercentageChange(data.totalRevenue, data.previousMonthRevenue) : "N/A";
-  const ordersChange = data ? calculatePercentageChange(data.newOrders, data.previousMonthOrders) : "N/A";
-  const customersChange = data ? calculatePercentageChange(data.totalCustomers, data.previousMonthCustomers) : "N/A";
-  const profitChange = data ? calculatePercentageChange(data.totalProfit, data.previousMonthProfit) : "N/A";
-
-  const renderLoadingSpinner = () => (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-      <CircularProgress size={20} />
-    </Box>
-  );
+  const InvoicesCard = () => {
+    if (loadingExpenses) {
+      return <CircularProgress />;
+    }
+  
+    if (expenseError) {
+      return <Typography color="error">Error loading expenses</Typography>;
+    }
+  
+    const pendingExpenses = expensesData ? expensesData.filter(expense => expense.status === 'pending') : [];
+    const totalPending = pendingExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  
+    return (
+      <Card elevation={3}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Pending Invoices</Typography>
+          <Typography variant="h4" color="primary" gutterBottom>
+            Total: {formatCurrency(totalPending)}
+          </Typography>
+          <Paper elevation={0}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Title</TableCell>
+                  <TableCell align="right">Amount</TableCell>
+                  <TableCell align="right">Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendingExpenses.slice(0, 5).map((expense) => (
+                  <TableRow key={expense._id}>
+                    <TableCell>{expense.title}</TableCell>
+                    <TableCell align="right">{formatCurrency(expense.amount)}</TableCell>
+                    <TableCell align="right">{new Date(expense.date).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+          {pendingExpenses.length > 5 && (
+            <Typography variant="body2" color="text.secondary" style={{ marginTop: '8px' }}>
+              {pendingExpenses.length - 5} more pending...
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
-    <Box m="1.5rem 2.5rem">
-      <FlexBetween>
+    <Box className="dashboard-container">
+      <Box className="header-container">
         <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
         <Button
-          onClick={handleDownloadReports}
           variant="contained"
           color="primary"
-          startIcon={<DownloadOutlined />}
-          sx={{
-            mb: 2,
-            fontSize: "14px",
-            fontWeight: "bold",
-            padding: "10px 20px",
-          }}
+          startIcon={<DownloadIcon />}
+          onClick={downloadCSV}
         >
-          Download Reports
+          Download Report
         </Button>
-      </FlexBetween>
+      </Box>
 
-      <Grid container spacing={3} mt={2}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={3}>
-            <CardContent>
-              <StatBox
-                title="Total Revenue"
-                value={data ? `$${data.totalRevenue.toLocaleString()}` : renderLoadingSpinner()}
-                increase={revenueChange}
-                description="vs. Last Month"
-                icon={
-                  <TrendingUp
-                    sx={{ color: theme.palette.success.main, fontSize: "26px" }}
-                  />
-                }
-              />
+      <Grid container spacing={3} className="grid-container">
+        {/* Summary Cards */}
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Box className="card-header">
+                <Typography variant="h6" gutterBottom>Total Employees</Typography>
+                <PeopleIcon color="primary" />
+              </Box>
+              {loadingEmployees ? (
+                <CircularProgress size={20} />
+              ) : employeeError ? (
+                <Typography color="error">Error</Typography>
+              ) : (
+                <Typography variant="h4">{employeesData?.length || 0}</Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={3}>
-            <CardContent>
-              <StatBox
-                title="New Orders"
-                value={data ? data.newOrders : renderLoadingSpinner()}
-                increase={ordersChange}
-                description="vs. Last Month"
-                icon={
-                  <ShoppingCart
-                    sx={{ color: theme.palette.info.main, fontSize: "26px" }}
-                  />
-                }
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={3}>
-            <CardContent>
-              <StatBox
-                title="Total Customers"
-                value={data ? data.totalCustomers : renderLoadingSpinner()}
-                increase={customersChange}
-                description="vs. Last Month"
-                icon={
-                  <People
-                    sx={{ color: theme.palette.warning.main, fontSize: "26px" }}
-                  />
-                }
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={3}>
-            <CardContent>
-              <StatBox
-                title="Total Profit"
-                value={data ? `$${data.totalProfit.toLocaleString()}` : renderLoadingSpinner()}
-                increase={profitChange}
-                description="vs. Last Month"
-                icon={
-                  <PointOfSale
-                    sx={{ color: theme.palette.error.main, fontSize: "26px" }}
-                  />
-                }
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
 
-      <Grid container spacing={3} mt={2}>
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Box className="card-header">
+                <Typography variant="h6" gutterBottom>Total Products</Typography>
+                <InventoryIcon color="primary" />
+              </Box>
+              {loadingProducts ? (
+                <CircularProgress size={20} />
+              ) : productError ? (
+                <Typography color="error">Error</Typography>
+              ) : (
+                <Typography variant="h4">{productsData?.length || 0}</Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Box className="card-header">
+                <Typography variant="h6" gutterBottom>New Customers</Typography>
+                <PersonAddIcon color="primary" />
+              </Box>
+              {loadingCustomers ? (
+                <CircularProgress size={20} />
+              ) : customerError ? (
+                <Typography color="error">Error</Typography>
+              ) : (
+                <Box>
+                  <Typography variant="h4">
+                    {newCustomerGrowth.current}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color={newCustomerGrowth.percentage >= 0 ? "green" : "red"}
+                  >
+                    {newCustomerGrowth.percentage >= 0 ? "+" : ""}
+                    {newCustomerGrowth.percentage.toFixed(1)}%
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Box className="card-header">
+                <Typography variant="h6" gutterBottom>Total Revenue</Typography>
+                <AttachMoneyIcon style={{ color: 'green' }} />
+              </Box>
+              {loadingTransactions ? (
+                <CircularProgress size={20} />
+              ) : transactionError ? (
+                <Typography color="error">Error</Typography>
+              ) : (
+                <Typography variant="h4" style={{ color: 'green' }}>
+                  {formatCurrency(totalRevenue)}
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4} lg={2.4}>
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Box className="card-header">
+                <Typography variant="h6" gutterBottom>Total Expenses</Typography>
+                <MoneyOffIcon style={{ color: 'red' }} />
+              </Box>
+              {loadingExpenses || loadingEmployees ? (
+                <CircularProgress size={20} />
+              ) : expenseError || employeeError ? (
+                <Typography color="error">Error</Typography>
+              ) : (
+                <Typography variant="h4" style={{ color: 'red' }}>
+                  {formatCurrency(totalExpenses)}
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Employees by Category */}
         <Grid item xs={12} md={6}>
-          <Card elevation={3}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Employees by Category
-              </Typography>
-              <Table 
-                size="small" 
-                aria-label="employee categories table"
-                sx={{
-                  '& .MuiTableCell-root': {
-                    borderColor: theme.palette.grey[300],
-                  },
-                }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Category</TableCell>
-                    <TableCell align="right">Employees</TableCell>
-                    <TableCell align="right">Total Salary</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {employeesByCategory.map((row) => (
-                    <TableRow key={row.category}>
-                      <TableCell component="th" scope="row">
-                        {row.category}
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Typography variant="h6" gutterBottom>Employees by Category</Typography>
+              {loadingEmployees ? (
+                <Box className="loading-container">
+                  <CircularProgress />
+                </Box>
+              ) : employeeError ? (
+                <Alert severity="error">Failed to load employees data!</Alert>
+              ) : (
+                <Table size="small" className="table-container">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Category</TableCell>
+                      <TableCell align="right">Count</TableCell>
+                      <TableCell align="right">Total Salary</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {employeesByCategory.slice(0, 5).map((row) => (
+                      <TableRow key={row.category}>
+                        <TableCell>{row.category}</TableCell>
+                        <TableCell align="right">{row.count}</TableCell>
+                        <TableCell align="right">
+                          {formatCurrency(row.totalSalary)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={2} align="right" className="total-row">
+                        Total
                       </TableCell>
-                      <TableCell align="right">{row.count}</TableCell>
-                      <TableCell align="right">
-                        ${row.totalSalary.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <TableCell align="right" className="total-row">
+                        {formatCurrency(totalSalary)}
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Products by Category */}
+        <Grid item xs={12} md={6}>
+          <Card elevation={3} className="card">
+            <CardContent className="card-content">
+              <Typography variant="h6" gutterBottom>Product Categories and Supply</Typography>
+              {loadingProducts ? (
+                <Box className="loading-container">
+                  <CircularProgress />
+                </Box>
+              ) : productError ? (
+                <Alert severity="error">Failed to load products data!</Alert>
+              ) : (
+                <Table size="small" className="table-container">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Category</TableCell>
+                      <TableCell align="right">Total Supply</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {productsByCategory.map((row) => (
+                      <TableRow key={row.category}>
+                        <TableCell>{row.category}</TableCell>
+                        <TableCell align="right">{row.totalSupply}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Trending Products */}
         <Grid item xs={12} md={6}>
           <Card elevation={3}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Future Content
-              </Typography>
+              <Typography variant="h6" gutterBottom>Trending Products</Typography>
+              {loadingTransactions || loadingProducts ? (
+                <CircularProgress />
+              ) : transactionError || productError ? (
+                <Alert severity="error">Failed to load trending products data!</Alert>
+              ) : trendingProducts.length === 0 ? (
+                <Typography>No trending products found.</Typography>
+              ) : (
+                <List dense>
+                  {trendingProducts.map((product, index) => (
+                    <ListItem key={product.id} disablePadding>
+                      <ListItemIcon>
+                        <TrendingUpIcon color="primary" />
+                      </ListItemIcon>
+                      <ListItemText 
+                        primary={`${index + 1}. ${product.name}`} 
+                        secondary={`${product.transactionCount} transactions`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Replace the Pending Invoices Table with the new InvoicesCard */}
+        <Grid item xs={12} md={6}>
+          <InvoicesCard />
+        </Grid>
+
+        {/* New Card: Products by Transaction Count */}
+        <Grid item xs={12}>
+          <Card elevation={3}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Products by Transaction Count</Typography>
+              {loadingTransactions || loadingProducts ? (
+                <CircularProgress />
+              ) : transactionError || productError ? (
+                <Alert severity="error">Failed to load product transaction data!</Alert>
+              ) : productTransactionCounts.length === 0 ? (
+                <Typography>No product transaction data available.</Typography>
+              ) : (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Product Name</TableCell>
+                      <TableCell align="right">Transaction Count</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {productTransactionCounts.slice(0, 10).map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>{product.name}</TableCell>
+                        <TableCell align="right">{product.transactionCount}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </Grid>
