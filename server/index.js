@@ -12,7 +12,6 @@ import assetsRoutes from './routes/assetsRoutes.js'; // Import the assets routes
 import expenseRoutes from './routes/expenseRoutes.js'; // Import the expense routes
 import dotenv from 'dotenv';
 import storesRoutes from './routes/storesRoutes.js'; // Add .js extension
-import checkRole from './middleware/checkRole.js';
 
 dotenv.config();
 
@@ -33,14 +32,14 @@ app.use((req, res, next) => {
 });
 
 /* ROUTES */
-// Remove console.log statements for production
-app.use('/api/employees', checkRole(['Human Resources (HR)', 'admin']), employeeRoutes);
-app.use('/api/products', checkRole(['Sales and Marketing', 'Operations', 'admin']), productRoutes);
-app.use('/api/customers', checkRole(['Sales and Marketing', 'admin']), customerRoutes);
-app.use('/api/transactions', checkRole(['Finance and Accounting', 'Sales and Marketing', 'admin']), transactionRoutes);
-app.use('/api/assets', checkRole(['Finance and Accounting', 'Operations', 'admin']), assetsRoutes);
-app.use('/api/expenses', checkRole(['Finance and Accounting', 'admin']), expenseRoutes);
-app.use('/api/stores', checkRole(['Operations', 'admin']), storesRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/assets', assetsRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/stores', storesRoutes);
+
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;
 

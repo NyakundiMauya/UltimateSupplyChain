@@ -12,6 +12,9 @@ const SignUpPage = () => {
         phoneNumber: '',
         password: '',
         category: '',
+        branch: '',
+        position: '',
+        salary: '', // New field
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -22,8 +25,13 @@ const SignUpPage = () => {
     };
 
     const validatePhoneNumber = (phone) => {
-        const phoneRegex = /^\d{10}$/; // Basic validation for 10-digit phone number
+        const phoneRegex = /^\d{10}$/;
         return phoneRegex.test(phone);
+    };
+
+    const validateBranchCode = (branch) => {
+        const branchRegex = /^[A-Z]{3}\d{3}$/;
+        return branchRegex.test(branch);
     };
 
     const handleSignup = async (e) => {
@@ -32,11 +40,18 @@ const SignUpPage = () => {
             setError('Please enter a valid 10-digit phone number.');
             return;
         }
+        if (!validateBranchCode(formData.branch)) {
+            setError('Please enter a valid branch code (e.g., NBO001).');
+            return;
+        }
         try {
-            // Send signup request to the backend
-            const response = await axios.post('http://localhost:9000/api/employees/signup', formData);
+            const dataToSend = {
+                ...formData,
+                salary: Number(formData.salary), // Convert to number
+            };
+            const response = await axios.post('http://localhost:9000/api/employees/signup', dataToSend);
             alert('Signup successful! Please login.');
-            navigate('/login'); // Redirect to login page after successful signup
+            navigate('/login');
         } catch (err) {
             // Set error message if signup fails
             if (err.response) {
@@ -106,6 +121,23 @@ const SignUpPage = () => {
                     <MenuItem value="Operations">Operations</MenuItem>
                     <MenuItem value="Information Technology (IT)">Information Technology (IT)</MenuItem>
                 </AuthInput>
+                <AuthInput
+                    name="branch"
+                    label="Branch Code (e.g., NBO001)"
+                    variant="outlined"
+                    value={formData.branch}
+                    onChange={handleChange}
+                    required
+                />
+                <AuthInput
+                    name="position"
+                    label="Position"
+                    variant="outlined"
+                    value={formData.position}
+                    onChange={handleChange}
+                    required
+                />
+                
                 <ButtonContainer>
                     <AuthButton type="submit" variant="contained">Signup</AuthButton>
                     <AuthButton type="button" variant="outlined" onClick={navigateToLogin}>Login</AuthButton>

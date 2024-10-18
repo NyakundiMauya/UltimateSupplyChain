@@ -1,6 +1,6 @@
 import express from 'express';
 import Employee from '../models/Employee.js'; // Ensure this path is correct
-import bcrypt from 'bcryptjs';
+// import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
         console.log('Employee found:', employee._id);
 
         // Compare the provided password with the hashed password in the database
-        const isMatch = await bcrypt.compare(password, employee.password);
+        const isMatch = password === employee.password; // Temporary direct comparison
         if (!isMatch) {
             console.log('Password mismatch for email:', email);
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -70,8 +70,7 @@ router.post('/signup', async (req, res) => {
         }
 
         // Hash the password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = password; // Temporary: store password as-is
 
         // Create a new employee object with hashed password
         const newEmployee = new Employee({
@@ -108,7 +107,6 @@ router.post('/signup', async (req, res) => {
             name: error.name,
             message: error.message,
             stack: error.stack,
-            // Log the request body (excluding password)
             requestBody: { ...req.body, password: '[REDACTED]' }
         });
         res.status(500).json({ 
@@ -197,8 +195,7 @@ router.put('/:id', async (req, res) => {
 
         // If password is being updated, hash it
         if (password) {
-            const salt = await bcrypt.genSalt(10);
-            updateData.password = await bcrypt.hash(password, salt);
+            updateData.password = password; // Temporary: store password as-is
         }
 
         const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, updateData, { new: true });

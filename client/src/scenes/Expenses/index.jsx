@@ -11,6 +11,7 @@ import {
   Snackbar,
   Alert,
   InputAdornment,
+  MenuItem,
 } from "@mui/material";
 import {
   useGetExpensesQuery,
@@ -227,13 +228,18 @@ const Expenses = () => {
               required
             />
             <TextField
+              select
               name="status"
               label="Status"
               defaultValue={currentExpense?.status || "pending"}
               fullWidth
               margin="normal"
               required
-            />
+            >
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </TextField>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseDialog} color="secondary">

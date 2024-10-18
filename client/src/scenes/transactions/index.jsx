@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, useTheme, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useGetTransactionsQuery } from "state/api";
+import { useGetTransactionsQuery, useGetProductsQuery } from "state/api";
 import Header from "components/Header";
 
 const Transactions = () => {
@@ -20,6 +20,9 @@ const Transactions = () => {
     sort: JSON.stringify(sort),
     search,
   });
+
+  // Add this line to fetch products data
+  const { refetch: refetchProducts } = useGetProductsQuery();
 
   const columns = [
     {
@@ -108,6 +111,11 @@ const Transactions = () => {
     );
   }
 
+  const handleTransactionSuccess = () => {
+    // Refetch products data to update supply
+    refetchProducts();
+  };
+
   return (
     <Box m="1.5rem 2.5rem">
       <Header 
@@ -145,6 +153,11 @@ const Transactions = () => {
             "& .MuiDataGrid-columnsContainer, & .MuiDataGrid-cell": {
               borderBottom: "1px solid rgba(224, 224, 224, 0.1)",
             },
+          }}
+          onRowClick={(params) => {
+            // Assuming the transaction is successful when a row is clicked
+            // You may want to replace this with your actual transaction success logic
+            handleTransactionSuccess();
           }}
         />
       </Box>

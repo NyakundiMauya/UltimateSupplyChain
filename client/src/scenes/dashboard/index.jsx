@@ -81,19 +81,22 @@ const Dashboard = () => {
     return employeesData.reduce((sum, emp) => sum + (emp.salary || 0), 0);
   }, [employeesData]);
 
-  // Calculate products by category and total supply
+  // Update the productsByCategory calculation
   const productsByCategory = useMemo(() => {
     if (!productsData) return [];
     const categories = {};
     productsData.forEach((product) => {
       if (!categories[product.category]) {
-        categories[product.category] = { totalSupply: 0 };
+        categories[product.category] = { totalSupply: 0, count: 0 };
       }
-      categories[product.category].totalSupply += product.supply || 0;
+      const totalSupply = product.supply.reduce((sum, supplyItem) => sum + (supplyItem.amount || 0), 0);
+      categories[product.category].totalSupply += totalSupply;
+      categories[product.category].count += 1;
     });
     return Object.entries(categories).map(([category, data]) => ({
       category,
       totalSupply: data.totalSupply,
+      count: data.count,
     }));
   }, [productsData]);
 
@@ -490,6 +493,7 @@ const Dashboard = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>Category</TableCell>
+                      <TableCell align="right">Product Count</TableCell>
                       <TableCell align="right">Total Supply</TableCell>
                     </TableRow>
                   </TableHead>
@@ -497,6 +501,7 @@ const Dashboard = () => {
                     {productsByCategory.map((row) => (
                       <TableRow key={row.category}>
                         <TableCell>{row.category}</TableCell>
+                        <TableCell align="right">{row.count}</TableCell>
                         <TableCell align="right">{row.totalSupply}</TableCell>
                       </TableRow>
                     ))}
