@@ -1,22 +1,42 @@
 # Ignore node_modules in client and server folders
+clientPOS/node_modules/
+serverPOS/node_modules/
 client/node_modules/
 server/node_modules/
 
 # pnpm specific files
+clientPOS/.pnp
+clientPOS/.pnp.js
+serverPOS/.pnp
+serverPOS/.pnp.js
 client/.pnp
 client/.pnp.js
 server/.pnp
 server/.pnp.js
 
 # Testing coverage reports
+clientPOS/coverage/
+serverPOS/coverage/
 client/coverage/
 server/coverage/
 
 # Production build directories
+clientPOS/build/
+serverPOS/build/
 client/build/
 server/build/
 
 # Miscellaneous
+clientPOS/.DS_Store
+clientPOS/.env.local
+clientPOS/.env.development.local
+clientPOS/.env.test.local
+clientPOS/.env.production.local
+serverPOS/.DS_Store
+serverPOS/.env.local
+serverPOS/.env.development.local
+serverPOS/.env.test.local
+serverPOS/.env.production.local
 client/.DS_Store
 client/.env.local
 client/.env.development.local
@@ -32,3 +52,7 @@ server/.env.production.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Environment files
+serverPOS/.env
+clientPOS/.env
