@@ -7,24 +7,23 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  Button
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper
 } from "@mui/material";
-import { 
-  useGetEmployeesQuery, 
-  useGetProductsQuery, 
-  useGetCustomersQuery,
-  useGetTransactionsQuery
-} from "state/api";
+import { useGetTransactionsQuery } from "state/api";
 import Header from "components/Header";
 import DownloadIcon from '@mui/icons-material/Download';
-import { ResponsiveContainer, Tooltip, Legend, ComposedChart, Bar, XAxis, YAxis } from 'recharts';
+import { ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from 'recharts';
 
-const Dashboard = () => {
+const Overview = () => {
   const theme = useTheme();
 
-  const { data: employeesData, isLoading: loadingEmployees, error: employeeError } = useGetEmployeesQuery();
-  const { data: productsData, isLoading: loadingProducts, error: productError } = useGetProductsQuery();
-  const { data: customersData, isLoading: loadingCustomers, error: customerError } = useGetCustomersQuery();
   const { data: transactionsData, isLoading: loadingTransactions, error: transactionError } = useGetTransactionsQuery({
     page: 0,
     pageSize: 1000,
@@ -32,34 +31,39 @@ const Dashboard = () => {
     search: "",
   });
 
-  const waterfallChartData = useMemo(() => {
+  const salesByMonth = useMemo(() => {
     if (!transactionsData) return [];
     
-    const totalRevenue = transactionsData.reduce((sum, transaction) => sum + parseFloat(transaction.cost), 0);
+    const salesMap = {};
+    transactionsData.forEach(transaction => {
+      const date = new Date(transaction.createdAt);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!salesMap[monthYear]) {
+        salesMap[monthYear] = 0;
+      }
+      salesMap[monthYear] += parseFloat(transaction.amount);
+    });
+
+    return Object.entries(salesMap)
+      .map(([date, total]) => ({ date, total: Number(total.toFixed(2)) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [transactionsData]);
+
+  const yearlySales = useMemo(() => {
+    if (!transactionsData) return [];
     
-    const categorizedRevenue = transactionsData.reduce((acc, transaction) => {
-      const category = transaction.products[0]?.category || 'Uncategorized';
-      if (!acc[category]) acc[category] = 0;
-      acc[category] += parseFloat(transaction.cost);
-      return acc;
-    }, {});
+    const salesMap = {};
+    transactionsData.forEach(transaction => {
+      const year = new Date(transaction.createdAt).getFullYear();
+      if (!salesMap[year]) {
+        salesMap[year] = 0;
+      }
+      salesMap[year]++;
+    });
 
-    const sortedCategories = Object.entries(categorizedRevenue)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 4);
-
-    const otherRevenue = totalRevenue - sortedCategories.reduce((sum, [, value]) => sum + value, 0);
-
-    return [
-      { name: 'Total Revenue', value: totalRevenue, fill: '#8884d8' },
-      ...sortedCategories.map(([category, value]) => ({ 
-        name: category, 
-        value: -value,
-        fill: '#82ca9d' 
-      })),
-      { name: 'Other', value: -otherRevenue, fill: '#ffc658' },
-      { name: 'Net Revenue', value: 0, fill: '#ff7300' }
-    ];
+    return Object.entries(salesMap)
+      .map(([year, count]) => ({ year: parseInt(year), count }))
+      .sort((a, b) => b.year - a.year);
   }, [transactionsData]);
 
   const downloadCSV = () => {
@@ -68,7 +72,7 @@ const Dashboard = () => {
       return;
     }
 
-    const headers = ['Date', 'Product', 'Customer', 'Cost'];
+    const headers = ['Date', 'Product', 'Customer', 'Amount'];
     const csvContent = [
       headers.join(','),
       ...transactionsData.map(transaction => 
@@ -76,7 +80,7 @@ const Dashboard = () => {
           transaction.createdAt,
           transaction.products.map(p => p.name).join(';'),
           transaction.userId,
-          transaction.cost
+          transaction.amount
         ].join(',')
       )
     ].join('\n');
@@ -94,7 +98,7 @@ const Dashboard = () => {
   return (
     <Box m="1.5rem 2.5rem">
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+        <Header title="OVERVIEW" subtitle="Sales overview and yearly transactions" />
         <Button
           variant="contained"
           color="primary"
@@ -107,26 +111,70 @@ const Dashboard = () => {
 
       <Card elevation={3} sx={{ mt: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>Revenue Breakdown</Typography>
-          {loadingTransactions || loadingEmployees || loadingProducts || loadingCustomers ? (
+          <Typography variant="h6" gutterBottom>Monthly Sales Overview</Typography>
+          {loadingTransactions ? (
             <CircularProgress />
-          ) : transactionError || employeeError || productError || customerError ? (
+          ) : transactionError ? (
             <Alert severity="error">Failed to load data!</Alert>
-          ) : !transactionsData || transactionsData.length === 0 || waterfallChartData.length === 0 ? (
+          ) : !salesByMonth || salesByMonth.length === 0 ? (
             <Typography>No data available.</Typography>
           ) : (
             <ResponsiveContainer width="100%" height={400}>
-              <ComposedChart
-                data={waterfallChartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              <BarChart
+                data={salesByMonth}
+                margin={{ top: 20, right: 30, left: 50, bottom: 5 }}
               >
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis 
+                  label={{ 
+                    value: 'Sales in Shillings', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle' }
+                  }}
+                />
+                <Tooltip formatter={(value) => `${value} Shillings`} />
                 <Legend />
-                <Bar dataKey="value" fill="#8884d8" />
-              </ComposedChart>
+                <Bar dataKey="total" fill={theme.palette.primary.main} name="Sales">
+                  <LabelList dataKey="total" position="top" formatter={(value) => `${value} Sh`} />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card elevation={3} sx={{ mt: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Yearly Transaction Count</Typography>
+          {loadingTransactions ? (
+            <CircularProgress />
+          ) : transactionError ? (
+            <Alert severity="error">Failed to load data!</Alert>
+          ) : !yearlySales || yearlySales.length === 0 ? (
+            <Typography>No data available.</Typography>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Year</TableCell>
+                    <TableCell align="right">Number of Transactions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {yearlySales.map((row) => (
+                    <TableRow key={row.year}>
+                      <TableCell component="th" scope="row">
+                        {row.year}
+                      </TableCell>
+                      <TableCell align="right">{row.count}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
         </CardContent>
       </Card>
@@ -134,4 +182,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Overview;

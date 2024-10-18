@@ -19,7 +19,7 @@ import Header from "components/Header";
 import DownloadIcon from '@mui/icons-material/Download';
 import './index.css';
 
-const Dashboard = () => {
+const Breakdown = () => {
   const theme = useTheme();
 
   // Fetch data from APIs
@@ -31,51 +31,49 @@ const Dashboard = () => {
     search: "",
   });
 
-  // Calculate salesByCategory
-  const salesByCategory = useMemo(() => {
+  // Calculate transactionsByCategory
+  const transactionsByCategory = useMemo(() => {
     if (!transactionsData || !productsData) return [];
     
-    const categorySales = {};
-    let totalSales = 0;
+    const categoryTransactions = {};
+    let totalTransactions = 0;
 
-    // Use transactionsData directly instead of transactionsData.transactions
     transactionsData.forEach(transaction => {
-      transaction.products.forEach(productId => {
-        const product = productsData.find(p => p._id === productId);
+      transaction.products.forEach(productEntry => {
+        const product = productsData.find(p => p._id.toString() === productEntry.product.toString());
         if (product) {
           const category = product.category;
-          const cost = parseFloat(transaction.cost) || 0;
-          if (!categorySales[category]) {
-            categorySales[category] = 0;
+          if (!categoryTransactions[category]) {
+            categoryTransactions[category] = 0;
           }
-          categorySales[category] += cost;
-          totalSales += cost;
+          categoryTransactions[category]++;
+          totalTransactions++;
         }
       });
     });
 
-    return Object.entries(categorySales).map(([name, value]) => ({
+    return Object.entries(categoryTransactions).map(([name, value]) => ({
       id: name,
       value,
-      label: `${name}: ${((value / totalSales) * 100).toFixed(1)}%`,
+      label: `${name}: ${((value / totalTransactions) * 100).toFixed(1)}%`,
     }));
   }, [transactionsData, productsData]);
 
   // Generate colors based on the number of categories
   const colors = useMemo(() => {
-    return salesByCategory.map((_, index) => 
+    return transactionsByCategory.map((_, index) => 
       theme.palette.augmentColor({
         color: {
           main: `hsl(${(index * 137.5) % 360}, 50%, 50%)`,
         },
       }).main
     );
-  }, [salesByCategory, theme.palette]);
+  }, [transactionsByCategory, theme.palette]);
 
   return (
     <Box className="dashboard-container">
-      <Box className="dashboard-header">
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+      <Box className="dashboard-header" sx={{ marginBottom: 3 }}>
+        <Header title="BREAKDOWN" subtitle="Breakdown of Transactions By Category" />
         <Button
           variant="contained"
           color="primary"
@@ -91,20 +89,20 @@ const Dashboard = () => {
           <Card elevation={3}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Product Sales by Category
+                Transactions by Product Category
               </Typography>
               {loadingProducts || loadingTransactions ? (
                 <CircularProgress />
               ) : productError || transactionError ? (
-                <Alert severity="error">Failed to load sales data!</Alert>
-              ) : salesByCategory.length === 0 ? (
-                <Typography>No sales data available.</Typography>
+                <Alert severity="error">Failed to load transaction data!</Alert>
+              ) : transactionsByCategory.length === 0 ? (
+                <Typography>No transaction data available.</Typography>
               ) : (
                 <Box className="pie-chart-container">
                   <PieChart
                     series={[
                       {
-                        data: salesByCategory,
+                        data: transactionsByCategory,
                         highlightScope: { faded: 'global', highlighted: 'item' },
                         faded: { innerRadius: 30, additionalRadius: -30 },
                         arcLabel: null,
@@ -115,7 +113,7 @@ const Dashboard = () => {
                     legend={{ hidden: true }}
                   />
                   <Box className="legend-container">
-                    {salesByCategory.map((category, index) => (
+                    {transactionsByCategory.map((category, index) => (
                       <Box key={category.id} className="legend-item">
                         <Box
                           className="legend-color"
@@ -137,4 +135,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Breakdown;

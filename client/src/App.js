@@ -10,7 +10,6 @@ import Customers from "scenes/customers";
 import Transactions from "scenes/transactions";
 import Overview from "scenes/overview";
 import Daily from "scenes/daily";
-import Monthly from "scenes/monthly";
 import Breakdown from "scenes/breakdown";
 import EmployeeManagement from "scenes/Employee/EmployeeManagement";
 import LandingPage from "components/LandingPage";
@@ -21,6 +20,7 @@ import Signup from "components/Auth/SignUpPage";
 import Assets from "scenes/assets"; // Updated import (lowercase 'assets')
 import Expenses from "scenes/Expenses"; // Simplified import
 import Invoices from "scenes/Invoices"; // Simplified import
+import Stores from "scenes/stores";
 import { getAuthDataFromCache } from './utils/authUtils';
 
 // Protected Route component
@@ -69,7 +69,7 @@ function App() {
                     <Route path="/transactions" element={<Transactions />} />
                     <Route path="/overview" element={<Overview />} />
                     <Route path="/daily" element={<Daily />} />
-                    <Route path="/monthly" element={<Monthly />} />
+                    <Route path="/stores" element={<Stores />} />
                     <Route path="/breakdown" element={<Breakdown />} />
                     <Route path="/employees" element={<EmployeeManagement />} />
                     <Route path="/settings" element={<Settings />} />

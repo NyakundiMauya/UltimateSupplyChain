@@ -224,6 +224,39 @@ export const api = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+
+    // Store Queries and Mutations
+    getStores: builder.query({
+      query: () => "api/stores",
+      providesTags: ["Stores"],
+    }),
+    getStoreById: builder.query({  // Add this query
+      query: (id) => `api/stores/${id}`,
+      providesTags: ["Stores"],
+    }),
+    createStore: builder.mutation({
+      query: (newStore) => ({
+        url: "api/stores",
+        method: "POST",
+        body: newStore,
+      }),
+      invalidatesTags: ["Stores"],
+    }),
+    updateStore: builder.mutation({
+      query: ({ id, ...storeData }) => ({
+        url: `api/stores/${id}`,
+        method: "PUT",
+        body: storeData,
+      }),
+      invalidatesTags: ["Stores"],
+    }),
+    deleteStore: builder.mutation({
+      query: (id) => ({
+        url: `api/stores/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Stores"],
+    }),
   }),
 });
 
@@ -256,4 +289,9 @@ export const {
   useCreateExpenseMutation,
   useUpdateExpenseMutation,
   useDeleteExpenseMutation,
+  useGetStoresQuery,
+  useGetStoreByIdQuery,
+  useCreateStoreMutation,
+  useUpdateStoreMutation,
+  useDeleteStoreMutation,
 } = api;

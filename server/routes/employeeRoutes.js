@@ -24,8 +24,9 @@ router.post('/login', async (req, res) => {
 
         console.log('Employee found:', employee._id);
 
-        // Directly compare the stored password
-        if (employee.password !== password) {
+        // Compare the provided password with the hashed password in the database
+        const isMatch = await bcrypt.compare(password, employee.password);
+        if (!isMatch) {
             console.log('Password mismatch for email:', email);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -58,7 +59,7 @@ router.post('/login', async (req, res) => {
 
 // Signup endpoint for new employees
 router.post('/signup', async (req, res) => {
-    const { name, email, password, role, category, salary, phoneNumber } = req.body;
+    const { name, email, password, role, category, salary, phoneNumber, branch, position } = req.body;
 
     try {
         // Check if the employee already exists
@@ -68,14 +69,21 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ error: 'Employee already exists' });
         }
 
-        // Create a new employee object without hashing the password
+        // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create a new employee object with hashed password
         const newEmployee = new Employee({
             name,
             email,
-            password,  // No hashing applied
+            password: hashedPassword,
             role,
             category,
+            salary,
             phoneNumber,
+            branch,
+            position,
         });
 
         // Save the employee to the database
@@ -134,10 +142,66 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Create a new employee
+router.post('/', async (req, res) => {
+    const { name, email, password, role, category, phoneNumber, branch, position, salary } = req.body;
+
+    try {
+        // Check if the employee already exists
+        const existingEmployee = await Employee.findOne({ email });
+        if (existingEmployee) {
+            console.log(`Create attempt with existing email: ${email}`);
+            return res.status(400).json({ error: 'Employee already exists' });
+        }
+
+        // Create a new employee object
+        const newEmployee = new Employee({
+            name,
+            email,
+            password,
+            role,
+            category,
+            phoneNumber,
+            branch,
+            position,  // Add the position field
+            salary,    // Add the salary field
+        });
+
+        // Save the employee to the database
+        await newEmployee.save();
+
+        // Remove sensitive data before sending the response
+        newEmployee.password = undefined;
+
+        console.log(`New employee created: ${newEmployee._id} (${newEmployee.email})`);
+        res.status(201).json({ employee: newEmployee });
+    } catch (error) {
+        console.error('Create employee error:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            requestBody: { ...req.body, password: '[REDACTED]' }
+        });
+        res.status(500).json({ 
+            error: 'An unexpected error occurred', 
+            details: error.message 
+        });
+    }
+});
+
 // Update an employee
 router.put('/:id', async (req, res) => {
     try {
-        const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { password, ...updateData } = req.body;
+
+        // If password is being updated, hash it
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(password, salt);
+        }
+
+        const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, updateData, { new: true });
         if (!updatedEmployee) {
             return res.status(404).json({ error: 'Employee not found' });
         }

@@ -6,11 +6,15 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  useTheme,
 } from "@mui/material";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { useGetTransactionsQuery } from "state/api"; // Assuming you have this hook
+import Header from "components/Header"; // Add this import
 
-const SalesLineChart = () => {
+
+const DailyTransactionsChart = () => {
+  const theme = useTheme();
   const { data: transactionsData, isLoading, error } = useGetTransactionsQuery({
     page: 0,
     pageSize: 1000,
@@ -18,21 +22,18 @@ const SalesLineChart = () => {
     search: "",
   });
 
-  const salesData = useMemo(() => {
+  const dailyTransactions = useMemo(() => {
     if (!transactionsData || !Array.isArray(transactionsData)) return [];
     
-    // Process transactions to count sales by day
-    const salesCountByDay = transactionsData.reduce((acc, transaction) => {
-      const date = new Date(transaction.createdAt).toLocaleDateString(); // Format date to MM/DD/YYYY
-      acc[date] = (acc[date] || 0) + 1; // Count the number of transactions per day
-      return acc;
-    }, {});
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const transactionsByDay = daysOfWeek.map(day => ({ day, count: 0 }));
 
-    // Convert to array for chart
-    return Object.entries(salesCountByDay).map(([date, count]) => ({
-      date,
-      count,
-    }));
+    transactionsData.forEach(transaction => {
+      const dayIndex = new Date(transaction.createdAt).getDay();
+      transactionsByDay[dayIndex].count++;
+    });
+
+    return transactionsByDay;
   }, [transactionsData]);
 
   if (isLoading) {
@@ -44,26 +45,49 @@ const SalesLineChart = () => {
   }
 
   if (error) {
-    return <Alert severity="error">Failed to load sales data!</Alert>;
+    return <Alert severity="error">Failed to load transaction data!</Alert>;
   }
 
   return (
-    <Card elevation={3}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Daily Sales
-        </Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={salesData}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="count" stroke="#8884d8" />
-          </LineChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <Box m="1.5rem 2.5rem">
+      <Header title="DAILY TRANSACTIONS" subtitle="Chart of daily transaction counts" />
+      <Box mt="40px">
+        <Card elevation={3}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Daily Transactions
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart 
+                data={dailyTransactions}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis 
+                  label={{ 
+                    value: 'Number of Transactions', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle' }
+                  }}
+                />
+                <Tooltip />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="count" 
+                  stroke={theme.palette.primary.main} 
+                  activeDot={{ r: 8 }}
+                  name="Transactions"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </Box>
+    </Box>
   );
 };
 
-export default SalesLineChart;
+export default DailyTransactionsChart;
