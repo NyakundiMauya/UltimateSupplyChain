@@ -1,0 +1,61 @@
+body {
+  color: #ffffff;
+  background-color: #202124;
+}
+
+.employee-management {
+  margin: 1.5rem 2.5rem;
+}
+
+.employee-management h1 {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.employee-management .add-button {
+  margin-bottom: 1rem;
+}
+
+.employee-grid {
+  margin-top: 24px;
+  height: 75vh;
+}
+
+.MuiDataGrid-root {
+  border: none;
+  background-color: var(--background-default);
+}
+
+.MuiDataGrid-cell {
+  border-bottom: none;
+  color: var(--secondary-100);
+}
+
+.MuiDataGrid-columnHeaders {
+  background-color: var(--background-alt);
+  color: var(--secondary-100);
+  border-bottom: none;
+}
+
+.MuiDataGrid-virtualScroller {
+  background-color: var(--background-default);
+}
+
+.MuiDataGrid-footerContainer {
+  background-color: var(--background-alt);
+  color: var(--secondary-100);
+  border-top: none;
+}
+
+.MuiDataGrid-toolbarContainer .MuiButton-text {
+  color: var(--secondary-200) !important;
+}
+
+.MuiDataGrid-row:hover {
+  background-color: var(--action-hover);
+}
+
+.MuiDataGrid-row:nth-of-type(even) {
+  background-color: var(--action-hover);
+}

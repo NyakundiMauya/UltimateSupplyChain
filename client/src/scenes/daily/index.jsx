@@ -1,88 +1,69 @@
-import React, { useMemo, useState } from "react";
-import { Box, useTheme } from "@mui/material";
-import Header from "components/Header";
-import { LineChart } from "@mui/x-charts/LineChart";
-import { useGetSalesQuery } from "state/api";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import React, { useMemo } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useGetTransactionsQuery } from "state/api"; // Assuming you have this hook
 
-const Daily = () => {
-  const [startDate, setStartDate] = useState(new Date("2021-02-01"));
-  const [endDate, setEndDate] = useState(new Date("2021-03-01"));
-  const { data } = useGetSalesQuery();
-  const theme = useTheme();
+const SalesLineChart = () => {
+  const { data: transactionsData, isLoading, error } = useGetTransactionsQuery({
+    page: 0,
+    pageSize: 1000,
+    sort: JSON.stringify({}),
+    search: "",
+  });
 
-  const formattedData = useMemo(() => {
-    if (!data) return { dates: [], totalSales: [], totalUnits: [] };
+  const salesData = useMemo(() => {
+    if (!transactionsData || !Array.isArray(transactionsData)) return [];
+    
+    // Process transactions to count sales by day
+    const salesCountByDay = transactionsData.reduce((acc, transaction) => {
+      const date = new Date(transaction.createdAt).toLocaleDateString(); // Format date to MM/DD/YYYY
+      acc[date] = (acc[date] || 0) + 1; // Count the number of transactions per day
+      return acc;
+    }, {});
 
-    const { dailyData } = data;
-    const dates = [];
-    const totalSales = [];
-    const totalUnits = [];
+    // Convert to array for chart
+    return Object.entries(salesCountByDay).map(([date, count]) => ({
+      date,
+      count,
+    }));
+  }, [transactionsData]);
 
-    Object.values(dailyData).forEach(({ date, totalSales: sales, totalUnits: units }) => {
-      const dateFormatted = new Date(date);
-      if (dateFormatted >= startDate && dateFormatted <= endDate) {
-        const splitDate = date.substring(date.indexOf("-") + 1);
-        dates.push(splitDate);
-        totalSales.push(sales);
-        totalUnits.push(units);
-      }
-    });
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-    return { dates, totalSales, totalUnits };
-  }, [data, startDate, endDate]);
+  if (error) {
+    return <Alert severity="error">Failed to load sales data!</Alert>;
+  }
 
   return (
-    <Box m="1.5rem 2.5rem">
-      <Header title="DAILY SALES" subtitle="Chart of daily sales" />
-      <Box height="75vh">
-        <Box display="flex" justifyContent="flex-end">
-          <Box>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-            />
-          </Box>
-          <Box>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-            />
-          </Box>
-        </Box>
-
-        {data ? (
-          <LineChart
-            xAxis={[{ scaleType: 'point', data: formattedData.dates }]}
-            series={[
-              {
-                data: formattedData.totalSales,
-                label: 'Total Sales',
-                color: theme.palette.secondary.main,
-              },
-              {
-                data: formattedData.totalUnits,
-                label: 'Total Units',
-                color: theme.palette.secondary[600],
-              },
-            ]}
-            width={800}
-            height={600}
-          />
-        ) : (
-          <>Loading...</>
-        )}
-      </Box>
-    </Box>
+    <Card elevation={3}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          Daily Sales
+        </Typography>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={salesData}>
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke="#8884d8" />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 };
 
-export default Daily;
+export default SalesLineChart;

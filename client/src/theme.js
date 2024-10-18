@@ -73,7 +73,7 @@ export const themeSettings = () => {
       },
     },
     typography: {
-      fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: '"Google Sans", sans-serif',
       fontSize: 14,
       h1: {
         fontSize: "0.75rem",
@@ -121,17 +121,6 @@ export const themeSettings = () => {
       borderRadius: 8,
     },
     components: {
-      MuiButton: {
-        styleOverrides: {
-          root: {
-            borderRadius: 24,
-            boxShadow: "none",
-            ":hover": {
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-            },
-          },
-        },
-      },
       MuiCard: {
         styleOverrides: {
           root: {

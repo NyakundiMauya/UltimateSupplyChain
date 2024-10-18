@@ -9,6 +9,7 @@ import {
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Header from "components/Header";
 import { useGetProductsQuery } from "state/api";
+import "./index.css"; 
 
 const Products = () => {
   const theme = useTheme();
@@ -37,12 +38,7 @@ const Products = () => {
       {data || !isLoading ? (
         <Paper
           elevation={3}
-          sx={{
-            mt: "40px",
-            height: "75vh",
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
+          className="products-paper"
         >
           <DataGrid
             loading={isLoading || !data}
@@ -50,44 +46,7 @@ const Products = () => {
             rows={data || []}
             columns={columns}
             components={{ Toolbar: GridToolbar }}
-            sx={{
-              border: "none",
-              "& .MuiDataGrid-root": {
-                border: "none",
-              },
-              "& .MuiDataGrid-cell": {
-                borderBottom: "1px solid #f0f0f0",
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-                borderBottom: "2px solid #e0e0e0",
-                fontWeight: "bold",
-              },
-              "& .MuiDataGrid-virtualScroller": {
-                backgroundColor: theme.palette.background.paper,
-              },
-              "& .MuiDataGrid-footerContainer": {
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.secondary,
-                borderTop: "none",
-              },
-              "& .MuiDataGrid-toolbarContainer": {
-                backgroundColor: theme.palette.background.paper,
-                padding: "8px 16px",
-                "& .MuiButton-root": {
-                  color: theme.palette.primary.main,
-                },
-              },
-              "& .MuiDataGrid-row": {
-                "&:nth-of-type(even)": {
-                  backgroundColor: theme.palette.action.hover,
-                },
-                "&:hover": {
-                  backgroundColor: theme.palette.action.selected,
-                },
-              },
-            }}
+            className="products-data-grid"
           />
         </Paper>
       ) : (

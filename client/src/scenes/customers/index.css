@@ -1,0 +1,42 @@
+.customers-container {
+  margin: 1.5rem 2.5rem;
+}
+
+.add-customer-button {
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 20px;
+}
+
+.data-grid-container {
+  margin-top: 40px;
+  height: 75vh;
+}
+
+.data-grid-container .MuiDataGrid-root {
+  border: none;
+  color: white;
+}
+
+.data-grid-container .MuiDataGrid-cell {
+  border-bottom: none;
+  color: white;
+}
+
+.data-grid-container .MuiDataGrid-columnHeaders {
+  border-bottom: none;
+  color: white;
+}
+
+.data-grid-container .MuiDataGrid-footerContainer {
+  border-top: none;
+}
+
+.dialog-paper {
+  border-radius: 12px;
+}
+
+.dialog-title {
+  color: white;
+}

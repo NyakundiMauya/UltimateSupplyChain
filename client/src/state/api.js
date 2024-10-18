@@ -17,9 +17,74 @@ export const api = createApi({
     "Employees",
     "Performance",
     "Dashboard",
+    "Assets",
+    "Expenses",
   ],
 
   endpoints: (builder) => ({
+    // Expense Queries and Mutations
+    getExpenses: builder.query({
+      query: () => "api/expenses",
+      providesTags: ["Expenses"],
+    }),
+    createExpense: builder.mutation({
+      query: (newExpense) => ({
+        url: "api/expenses",
+        method: "POST",
+        body: newExpense,
+      }),
+      invalidatesTags: ["Expenses"],
+    }),
+    updateExpense: builder.mutation({
+      query: ({ id, ...expenseData }) => ({
+        url: `api/expenses/${id}`,
+        method: "PUT",
+        body: expenseData,
+      }),
+      invalidatesTags: ["Expenses"],
+    }),
+    deleteExpense: builder.mutation({
+      query: (id) => ({
+        url: `api/expenses/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Expenses"],
+    }),
+
+  
+    // Asset Queries and Mutations
+    getAssets: builder.query({
+      query: () => "api/assets",
+      providesTags: ["Assets"],
+    }),
+    createAsset: builder.mutation({
+      query: (newAsset) => ({
+        url: "api/assets",
+        method: "POST",
+        body: newAsset,
+      }),
+      invalidatesTags: ["Assets"],
+    }),
+    getAssetById: builder.query({
+      query: (id) => `api/assets/${id}`,
+      providesTags: ["Assets"],
+    }),
+    updateAsset: builder.mutation({
+      query: ({ id, ...assetData }) => ({
+        url: `api/assets/${id}`,
+        method: "PUT",
+        body: assetData,
+      }),
+      invalidatesTags: ["Assets"],
+    }),
+    deleteAsset: builder.mutation({
+      query: (id) => ({
+        url: `api/assets/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Assets"],
+    }),
+
     // User Queries
     getUser: builder.query({
       query: (id) => `general/user/${id}`,
@@ -28,12 +93,12 @@ export const api = createApi({
 
     // Customer Queries and Mutations
     getCustomers: builder.query({
-      query: () => "client/customers",
+      query: () => "api/customers",
       providesTags: ["Customers"],
     }),
     createCustomer: builder.mutation({
       query: (newCustomer) => ({
-        url: "client/customers",
+        url: "api/customers",
         method: "POST",
         body: newCustomer,
       }),
@@ -41,7 +106,7 @@ export const api = createApi({
     }),
     updateCustomer: builder.mutation({
       query: ({ id, ...customerData }) => ({
-        url: `client/customers/${id}`,
+        url: `api/customers/${id}`,
         method: "PUT",
         body: customerData,
       }),
@@ -49,7 +114,7 @@ export const api = createApi({
     }),
     deleteCustomer: builder.mutation({
       query: (id) => ({
-        url: `client/customers/${id}`,
+        url: `api/customers/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Customers"],
@@ -57,12 +122,12 @@ export const api = createApi({
 
     // Product Queries and Mutations
     getProducts: builder.query({
-      query: () => "client/products",
+      query: () => "api/products",
       providesTags: ["Products"],
     }),
     createProduct: builder.mutation({
       query: (newProduct) => ({
-        url: "client/products",
+        url: "api/products",
         method: "POST",
         body: newProduct,
       }),
@@ -70,7 +135,7 @@ export const api = createApi({
     }),
     updateProduct: builder.mutation({
       query: ({ id, ...productData }) => ({
-        url: `client/products/${id}`,
+        url: `api/products/${id}`,
         method: "PUT",
         body: productData,
       }),
@@ -78,7 +143,7 @@ export const api = createApi({
     }),
     deleteProduct: builder.mutation({
       query: (id) => ({
-        url: `client/products/${id}`,
+        url: `api/products/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Products"],
@@ -116,7 +181,7 @@ export const api = createApi({
     // Transaction Queries
     getTransactions: builder.query({
       query: ({ page, pageSize, sort, search }) => ({
-        url: "client/transactions",
+        url: "api/transactions",  // Updated URL
         params: { page, pageSize, sort, search },
       }),
       providesTags: ["Transactions"],
@@ -183,4 +248,12 @@ export const {
   useGetDashboardQuery,
   useLoginMutation,
   useSignupMutation,
+  useGetAssetsQuery,
+  useCreateAssetMutation,
+  useUpdateAssetMutation,
+  useDeleteAssetMutation,
+  useGetExpensesQuery,
+  useCreateExpenseMutation,
+  useUpdateExpenseMutation,
+  useDeleteExpenseMutation,
 } = api;

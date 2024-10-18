@@ -1,0 +1,53 @@
+.expenses-container {
+  margin: 1.5rem 2.5rem;
+}
+
+.add-expense-button {
+  margin-bottom: 20px;
+}
+
+.data-grid-container {
+  margin-top: 24px;
+}
+
+.MuiDataGrid-root {
+  border: none;
+  background-color: var(--background-default);
+}
+
+.MuiDataGrid-cell {
+  border-bottom: none;
+  color: var(--secondary-100);
+}
+
+.MuiDataGrid-columnHeaders {
+  background-color: var(--background-alt);
+  color: var(--secondary-100);
+  border-bottom: none;
+}
+
+.MuiDataGrid-virtualScroller {
+  background-color: var(--background-default);
+}
+
+.MuiDataGrid-footerContainer {
+  background-color: var(--background-alt);
+  color: var(--secondary-100);
+  border-top: none;
+}
+
+.MuiDataGrid-toolbarContainer .MuiButton-text {
+  color: var(--secondary-200) !important;
+}
+
+.MuiDataGrid-row:hover {
+  background-color: var(--action-hover);
+}
+
+.MuiDataGrid-row:nth-of-type(even) {
+  background-color: var(--action-hover);
+}
+
+.dialog-paper {
+  background-color: var(--background-alt);
+}

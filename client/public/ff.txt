@@ -10,6 +10,7 @@ import {
   TextField,
   Snackbar,
   Alert,
+  Typography,
 } from "@mui/material";
 import {
   useGetCustomersQuery,
@@ -19,7 +20,6 @@ import {
 } from "state/api";
 import Header from "components/Header";
 import { DataGrid } from "@mui/x-data-grid";
-import './index.css'; // Import the CSS file
 
 const Customers = () => {
   const theme = useTheme();
@@ -166,38 +166,48 @@ const Customers = () => {
   };
 
   return (
-    <Box className="customers-container">
+    <Box m="1.5rem 2.5rem">
       <Header title="Customers" subtitle="List of Customers" />
       <Button
         onClick={() => handleOpenDialog()}
         variant="contained"
         color="primary"
-        className="add-customer-button"
+        sx={{ 
+          mb: 2,
+          fontSize: "14px",
+          fontWeight: "bold",
+          padding: "10px 20px",
+        }}
       >
         Add Customer
       </Button>
       <Box
-        className="data-grid-container"
+        mt="40px"
+        height="75vh"
         sx={{
           "& .MuiDataGrid-root": {
+            border: "none",
             backgroundColor: theme.palette.background.default,
           },
           "& .MuiDataGrid-cell": {
-            color: "#FFFFFF", // Changed to white
+            borderBottom: "none",
+            color: theme.palette.secondary[100],
           },
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: theme.palette.background.alt,
-            color: "#FFFFFF", // Changed to white
+            color: theme.palette.secondary[100],
+            borderBottom: "none",
           },
           "& .MuiDataGrid-virtualScroller": {
             backgroundColor: theme.palette.background.default,
           },
           "& .MuiDataGrid-footerContainer": {
             backgroundColor: theme.palette.background.alt,
-            color: "#FFFFFF", // Changed to white
+            color: theme.palette.secondary[100],
+            borderTop: "none",
           },
           "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: "#FFFFFF !important", // Changed to white
+            color: `${theme.palette.secondary[200]} !important`,
           },
           "& .MuiDataGrid-row:hover": {
             backgroundColor: theme.palette.action.hover,
@@ -212,18 +222,18 @@ const Customers = () => {
         />
       </Box>
 
+      {/* Dialog for adding or editing customer */}
       <Dialog 
         open={openDialog} 
         onClose={handleCloseDialog}
         PaperProps={{
-          className: "dialog-paper",
           style: {
             backgroundColor: theme.palette.background.alt,
-            color: "#FFFFFF", // Added white text color for dialog content
+            borderRadius: "12px",
           }
         }}
       >
-        <DialogTitle className="dialog-title" style={{ color: "#FFFFFF" }}>
+        <DialogTitle sx={{ color: theme.palette.secondary[100] }}>
           {currentCustomer ? "Edit Customer" : "Add Customer"}
         </DialogTitle>
         <form onSubmit={handleSaveCustomer}>

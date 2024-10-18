@@ -1,8 +1,9 @@
 // src/pages/Login.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { AuthContainer, AuthForm, AuthInput, AuthButton, AuthError } from './authStyles';
+import { AuthContainer, AuthForm, AuthInput, AuthButton, AuthError, ButtonContainer } from './authStyles';
+import { Toast } from '../common/Toast';
 
 // Add this line at the top of your file
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:9000';
@@ -12,6 +13,19 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [showCookieToast, setShowCookieToast] = useState(false);
+
+    useEffect(() => {
+        const cookiesAccepted = localStorage.getItem('cookiesAccepted');
+        if (!cookiesAccepted) {
+            setShowCookieToast(true);
+        }
+    }, []);
+
+    const handleAcceptCookies = () => {
+        localStorage.setItem('cookiesAccepted', 'true');
+        setShowCookieToast(false);
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -21,9 +35,13 @@ const Login = () => {
                 password,
             });
             const { token, employee } = response.data;
-            localStorage.setItem('token', token);
-            localStorage.setItem('employee', JSON.stringify(employee));
-            // Remove the alert and use a more user-friendly notification method if needed
+            
+            // Store auth data in cache instead of localStorage
+            if ('caches' in window) {
+                const cache = await caches.open('auth-cache');
+                await cache.put('auth-data', new Response(JSON.stringify({ token, employee })));
+            }
+
             navigate('/dashboard');
         } catch (err) {
             if (err.response) {
@@ -40,6 +58,10 @@ const Login = () => {
                 setError('An unexpected error occurred. Please try again.');
             }
         }
+    };
+
+    const handleHomeClick = () => {
+        navigate('/home');
     };
 
     return (
@@ -62,8 +84,18 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                 />
-                <AuthButton type="submit" variant="contained">Login</AuthButton>
+                <ButtonContainer>
+                    <AuthButton type="submit" variant="contained">Login</AuthButton>
+                    <AuthButton onClick={handleHomeClick} variant="outlined">Home</AuthButton>
+                </ButtonContainer>
             </AuthForm>
+            {showCookieToast && (
+                <Toast 
+                    message="This site uses cookies. Do you accept?"
+                    onAccept={handleAcceptCookies}
+                    onDecline={() => setShowCookieToast(false)}
+                />
+            )}
         </AuthContainer>
     );
 };

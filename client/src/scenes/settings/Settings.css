@@ -1,0 +1,85 @@
+.settings-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.settings-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.error-message {
+  color: #d32f2f;
+  text-align: center;
+  font-weight: bold;
+}
+
+.loading-message {
+  text-align: center;
+  color: #666;
+}
+
+.profile-card {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+.profile-header {
+  background-color: #3f51b5;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  background-color: #fff;
+  color: #3f51b5;
+  font-size: 24px;
+  font-weight: 500;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.profile-details {
+  padding: 16px;
+}
+
+.profile-item {
+  margin-bottom: 16px;
+}
+
+.profile-label {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.profile-value {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.success-message {
+  color: #4caf50;
+  background-color: #e8f5e9;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}

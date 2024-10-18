@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetTransactionsQuery } from "state/api";
 import Header from "components/Header";
+
 const Transactions = () => {
   const theme = useTheme();
 
@@ -13,7 +14,7 @@ const Transactions = () => {
   const [search, setSearch] = useState("");
 
   const [searchInput, setSearchInput] = useState("");
-  const { data, isLoading } = useGetTransactionsQuery({
+  const { data: transactionsData, isLoading, error } = useGetTransactionsQuery({
     page,
     pageSize,
     sort: JSON.stringify(sort),
@@ -47,9 +48,36 @@ const Transactions = () => {
       field: "cost",
       headerName: "Cost",
       flex: 1,
-      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
+      renderCell: (params) => `KSH ${Number(params.value).toFixed(2)}`,
     },
   ];
+
+  if (error) {
+    return (
+      <Box m="1.5rem 2.5rem">
+        <Header 
+          title="Transactions" 
+          subtitle="Error loading transactions" 
+          titleVariant="h5" 
+          subtitleVariant="subtitle2" 
+        />
+        <Typography color="error" variant="h6" mt={2}>
+          {error.status === 'FETCH_ERROR' 
+            ? 'Network error. Please check your connection and try again.' 
+            : error.status === 'PARSING_ERROR'
+            ? 'Error parsing the server response. Please try again later.'
+            : error.status === 'CUSTOM_ERROR'
+            ? `Server error: ${error.error}`
+            : `An unexpected error occurred. Please try again later. (Status: ${error.status || 'unknown'})`}
+        </Typography>
+        {process.env.NODE_ENV === 'development' && (
+          <Typography color="error" variant="body2" mt={1}>
+            Debug info: {JSON.stringify(error, null, 2)}
+          </Typography>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -61,53 +89,14 @@ const Transactions = () => {
       />
       <Box
         height="80vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-            backgroundColor: "#202124",
-            color: "#ffffff",
-            fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-            fontSize: "0.875rem",
-            fontWeight: 400,
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "rgba(138, 180, 248, 0.12)",
-            color: "#8ab4f8",
-            borderBottom: "none",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: "#202124",
-          },
-          "& .MuiDataGrid-footerContainer": {
-            backgroundColor: "rgba(138, 180, 248, 0.12)",
-            color: "#8ab4f8",
-            borderTop: "none",
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: "#8ab4f8 !important",
-          },
-          "& .MuiDataGrid-row:hover": {
-            backgroundColor: theme.palette.action.hover,
-          },
-          "& .MuiDataGrid-cell:focus": {
-            outline: "none",
-          },
-          "& .MuiDataGrid-columnHeader:focus": {
-            outline: "none",
-          },
-        }}
+        
       >
         <DataGrid
-          loading={isLoading || !data}
+          loading={isLoading || !transactionsData}
           getRowId={(row) => row._id}
-          rows={(data && data.transactions) || []}
+          rows={transactionsData || []}
           columns={columns}
-          rowCount={(data && data.total) || 0}
+          rowCount={(transactionsData && transactionsData.length) || 0}
           rowsPerPageOptions={[20, 50, 100]}
           pagination
           page={page}

@@ -1,4 +1,5 @@
 // middleware/checkRole.js
+/*
 const checkRole = (allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -17,3 +18,4 @@ const checkRole = (allowedRoles) => {
 };
 
 export default checkRole;
+*/

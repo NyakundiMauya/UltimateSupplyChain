@@ -1,0 +1,50 @@
+.assets-container {
+  margin: 1.5rem 2.5rem;
+}
+
+.add-asset-button {
+  margin-bottom: 16px;
+}
+
+.assets-data-grid {
+  height: 600px;
+}
+
+.edit-button,
+.delete-button {
+  margin: 0 4px;
+}
+
+.dialog-paper {
+  min-width: 400px;
+}
+
+.dialog-title {
+  background-color: var(--background-alt);
+  color: var(--secondary-100);
+}
+
+.MuiTextField-root {
+  margin-bottom: 16px;
+}
+
+.MuiInputLabel-root {
+  color: var(--secondary-200);
+}
+
+.MuiOutlinedInput-root {
+  background-color: var(--background-default);
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--secondary-200);
+}
+
+.MuiButton-contained {
+  background-color: var(--primary-500);
+  color: var(--secondary-100);
+}
+
+.MuiButton-contained:hover {
+  background-color: var(--primary-600);
+}
