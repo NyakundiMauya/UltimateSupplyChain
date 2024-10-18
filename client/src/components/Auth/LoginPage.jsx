@@ -29,6 +29,7 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setError(''); // Clear any previous errors
         try {
             const response = await axios.post(`${API_BASE_URL}/api/employees/login`, {
                 email,
@@ -44,18 +45,22 @@ const Login = () => {
 
             navigate('/dashboard');
         } catch (err) {
+            console.error('Login error:', err);
             if (err.response) {
-                if (err.response.status === 401) {
-                    setError('Invalid email or password. Please try again.');
-                } else if (err.response.status === 404) {
-                    setError('Login service is not available. Please contact the administrator.');
-                } else {
-                    setError(err.response.data.error || 'Login failed');
+                switch (err.response.status) {
+                    case 401:
+                        setError('Invalid email or password. Please check your credentials and try again.');
+                        break;
+                    case 404:
+                        setError('Login service is not available. Please contact the administrator.');
+                        break;
+                    default:
+                        setError(err.response.data.error || 'Login failed. Please try again.');
                 }
             } else if (err.request) {
-                setError('No response from server. Please try again later.');
+                setError('No response from server. Please check your internet connection and try again.');
             } else {
-                setError('An unexpected error occurred. Please try again.');
+                setError('An unexpected error occurred. Please try again later.');
             }
         }
     };

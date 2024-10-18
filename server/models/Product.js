@@ -7,7 +7,23 @@ const ProductSchema = new mongoose.Schema(
     description: String,
     category: String,
     rating: Number,
-    supply: Number,
+    supply: [{
+      branchCode: {
+        type: String,
+        required: true,
+        validate: {
+          validator: function (v) {
+            return /^[A-Z]{3}\d{3}$/.test(v);
+          },
+          message: props => `${props.value} is not a valid branch code!`,
+        },
+      },
+      amount: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+    }],
   },
   { timestamps: true }
 );

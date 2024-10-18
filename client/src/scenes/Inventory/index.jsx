@@ -37,7 +37,9 @@ const Inventory = () => {
                   rows={productsData.map(product => ({
                     id: product._id,
                     ...product,
-                    supply: Math.floor(Math.random() * 100) // Simulated supply for this store
+                    supply: Array.isArray(product.supply)
+                      ? product.supply.find(s => s.branchCode === store.branch)?.amount || 0
+                      : product.supply
                   }))}
                   columns={productColumns}
                 />
